@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@geist-ui/font": "latest",
     "@heroicons/react": "^2.2.0",
     "next": "14.0.0",
     "react": "^18",
