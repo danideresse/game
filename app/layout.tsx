@@ -1,11 +1,8 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import Navigation from './components/Navigation'
 import { ThemeProvider } from './context/ThemeContext'
 import ThemeSwitcher from './components/ThemeSwitcher'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Number Game',
@@ -19,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen`}>
+      <body className="min-h-screen font-sans">
         <ThemeProvider>
           <div className="max-w-7xl mx-auto bg-gaming-dark/30 min-h-screen relative pb-20">
             <div className="lg:max-w-3xl xl:max-w-4xl mx-auto">
