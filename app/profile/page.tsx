@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { PhoneIcon, WalletIcon, ArrowPathIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
-
 export default function Profile() {
   const [balance] = useState(1000);
   const [phoneNumber] = useState('+251 91 234 5678');
