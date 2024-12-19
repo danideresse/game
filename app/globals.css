@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root[data-theme="light"] {
+  --foreground-rgb: 31, 41, 55;
+  --background-start: 255, 255, 255;
+  --background-end: 249, 250, 251;
+  --primary: 245, 158, 11;
+  --gaming-dark: 229, 231, 235;
+  --card-bg: 255, 255, 255, 0.9;
+  --text-secondary: 107, 114, 128;
+}
+
+:root[data-theme="dark"] {
+  --foreground-rgb: 255, 255, 255;
+  --background-start: 17, 24, 39;
+  --background-end: 30, 41, 59;
+  --primary: 255, 170, 0;
+  --gaming-dark: 17, 24, 39;
+  --card-bg: 255, 255, 255, 0.1;
+  --text-secondary: 156, 163, 175;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+    135deg,
+    rgb(var(--background-start)),
+    rgb(var(--background-end))
+  );
+  min-height: 100vh;
+  background-blend-mode: overlay;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.glass-effect {
+  background: rgba(var(--card-bg));
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.card {
+  @apply glass-effect rounded-2xl transition-all duration-300;
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+  }
+}
+
+.btn-primary {
+  @apply bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold 
+         py-3 px-6 rounded-lg transition-all duration-300
+         hover:from-orange-600 hover:to-yellow-600 
+         hover:shadow-lg hover:shadow-orange-500/30
+         disabled:opacity-50 disabled:hover:shadow-none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  @apply w-2 bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+/* Global typography */
+h1 {
+  @apply text-2xl font-bold text-gray-800;
+}
+
+/* Button styles */
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors;
+}
+
+/* Add glow effect for numbers */
+.number-glow {
+  text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.text-primary {
+  color: rgb(var(--primary));
+}
+
+.bg-gaming-dark {
+  background-color: rgb(var(--gaming-dark));
+}
