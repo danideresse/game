@@ -5,10 +5,7 @@ import Navigation from './components/Navigation'
 import { ThemeProvider } from './context/ThemeContext'
 import ThemeSwitcher from './components/ThemeSwitcher'
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  display: 'swap',
-})
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Number Game',
