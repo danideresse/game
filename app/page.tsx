@@ -13,14 +13,14 @@ export default function Home() {
   const games = [
     {
       id: 1,
-      title: 'Game 1',
-      description: 'Choose from 5 numbers',
+      title: 'ጨዋታ 1',
+      description: 'ከ አምስቱ ቁጥሮች ውስጥ አንዱን ይምረጡ',
       href: '/games/game1'
     },
     {
       id: 2,
-      title: 'Game 2',
-      description: 'Choose from 10 numbers',
+      title: 'ጨዋታ 2',
+      description: 'ከ አስሩ ቁጥሮች ውስጥ አንዱን ይምረጡ',
       href: '/games/game2'
     }
   ];
