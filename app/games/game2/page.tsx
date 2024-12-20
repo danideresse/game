@@ -57,7 +57,7 @@ export default function Game2() {
           className="btn-primary w-full text-sm sm:text-base"
           disabled={!selectedNumber}
           onClick={handleBet}>
-          Place Bet
+          Choose
         </button>
       </div>
 
