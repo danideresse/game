@@ -6,9 +6,11 @@ import confetti from 'canvas-confetti';
 interface GameResultProps {
   result: 'win' | 'lose' | 'retry' | null;
   onClose: () => void;
+  selectedNumber?: number;
+  winningAmount?: number;
 }
 
-export default function GameResult({ result, onClose }: GameResultProps) {
+export default function GameResult({ result, onClose, selectedNumber, winningAmount }: GameResultProps) {
   useEffect(() => {
     if (result === 'win') {
       const duration = 3000;
@@ -43,13 +45,13 @@ export default function GameResult({ result, onClose }: GameResultProps) {
   const resultConfig = {
     win: {
       title: 'Congratulations!',
-      message: 'You won the game!',
+      message: `You won ${winningAmount?.toFixed(2)} Birr with number ${selectedNumber}!`,
       color: 'from-green-500 to-emerald-500',
       icon: '🎉'
     },
     lose: {
       title: 'Better Luck Next Time',
-      message: 'Try again with a different number',
+      message: `Your number was ${selectedNumber}`,
       color: 'from-red-500 to-rose-500',
       icon: '😔'
     },

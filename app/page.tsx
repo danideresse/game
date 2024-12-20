@@ -4,10 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Squares2X2Icon as ViewGridIcon, ListBulletIcon as ViewListIcon } from '@heroicons/react/24/outline';
+import DepositPopup from './components/DepositPopup';
 
 export default function Home() {
   const [balance] = useState(0);
   const [isGridView, setIsGridView] = useState(true);
+  const [showDepositPopup, setShowDepositPopup] = useState(false);
   const uniqueId = "USER123";
   
   const games = [
@@ -30,7 +32,7 @@ export default function Home() {
       <div className="text-center mb-8 card p-6 md:p-8 max-w-xl mx-auto">
         <p className="text-theme-secondary animate-fadeIn text-sm sm:text-base">ID: {uniqueId}</p>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-2 animate-float number-glow text-primary">
-          {balance.toFixed(2)} Birr
+          {balance.toFixed(2)} Points
         </h1>
       </div>
       
@@ -105,17 +107,14 @@ export default function Home() {
       <div className="max-w-md mx-auto w-full">
         <button 
           className="btn-primary w-full animate-fadeIn text-sm sm:text-base flex items-center justify-center gap-2"
-          onClick={() => {/* Implement Telebirr integration */}}>
-          {/* <Image
-            src="/telebirr.png"
-            alt="Telebirr"
-            width={24}
-            height={24}
-            className="w-6 h-6 sm:w-7 sm:h-7"
-          /> */}
+          onClick={() => setShowDepositPopup(true)}>
           Deposit with Telebirr
         </button>
       </div>
+
+      {showDepositPopup && (
+        <DepositPopup onClose={() => setShowDepositPopup(false)} />
+      )}
     </div>
   );
 }

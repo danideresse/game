@@ -4,10 +4,13 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PhoneIcon, WalletIcon, ArrowPathIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import DepositPopup from '../components/DepositPopup';
+
 export default function Profile() {
   const [balance] = useState(1000);
   const [phoneNumber] = useState('+251 91 234 5678');
   const [username] = useState('USER123');
+  const [showDepositPopup, setShowDepositPopup] = useState(false);
 
   return (
     <div className="p-4 sm:p-6 md:p-8 animate-slideUpAndFade space-y-6">
@@ -39,10 +42,13 @@ export default function Profile() {
           </button>
         </div>
         <div className="text-3xl font-bold text-primary mb-6 animate-shimmer bg-gradient-to-r from-transparent via-primary/10 to-transparent bg-[length:200%_100%]">
-          {balance.toFixed(2)} Birr
+          {balance.toFixed(2)} Points
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button className="btn-primary transform transition-all duration-300 hover:scale-110 hover:rotate-1">
+          <button 
+            className="btn-primary transform transition-all duration-300 hover:scale-110 hover:rotate-1"
+            onClick={() => setShowDepositPopup(true)}
+          >
             Deposit
           </button>
           <button className="glass-effect text-theme-secondary hover:text-primary px-6 py-3 rounded-lg transition-all duration-300 hover:scale-110 hover:-rotate-1">
@@ -97,6 +103,10 @@ export default function Profile() {
           </button>
         </div>
       </div>
+
+      {showDepositPopup && (
+        <DepositPopup onClose={() => setShowDepositPopup(false)} />
+      )}
     </div>
   );
 }
@@ -129,7 +139,7 @@ function TransactionItem({ type, amount, date, status }: {
       </div>
       <div className="flex items-center gap-2">
         <span className="font-semibold text-primary">
-          {type === 'deposit' ? '+' : '-'}{amount} Birr
+          {type === 'deposit' ? '+' : '-'}{amount} Points
         </span>
         <span className={`text-sm ${status === 'completed' ? 'text-green-500' : 'text-yellow-500'}`}>
           {status}

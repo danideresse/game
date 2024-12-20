@@ -8,6 +8,7 @@ export default function Game2() {
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [numbers, setNumbers] = useState<number[]>([]);
   const [gameResult, setGameResult] = useState<'win' | 'lose' | 'retry' | null>(null);
+  const [winningAmount, setWinningAmount] = useState<number>(0);
   
   useEffect(() => {
     // Generate 10 random numbers between 1 and 100
@@ -26,6 +27,12 @@ export default function Game2() {
     // Simulate random result
     const results = ['win', 'lose', 'retry'] as const;
     const randomResult = results[Math.floor(Math.random() * results.length)];
+    
+    // Set winning amount if won (example: random amount between 100 and 300)
+    if (randomResult === 'win') {
+      setWinningAmount(Math.floor(Math.random() * 200) + 100);
+    }
+    
     setGameResult(randomResult);
   };
   
@@ -44,8 +51,8 @@ export default function Game2() {
               card p-4 md:p-6 text-lg sm:text-xl md:text-2xl font-bold 
               hover:scale-105 transition-all
               ${selectedNumber === num 
-                ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-#f5a001 shadow-glow' 
-                : 'bg-white dark:bg-gaming-dark text-orange-500 hover:bg-primary/10'}
+                ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-glow' 
+                : 'bg-white dark:bg-gaming-dark text-orange-500 dark:text-white hover:bg-primary/10'}
             `}>
             {num}
           </button>
@@ -63,7 +70,9 @@ export default function Game2() {
 
       <GameResult 
         result={gameResult} 
-        onClose={() => setGameResult(null)} 
+        onClose={() => setGameResult(null)}
+        selectedNumber={selectedNumber || undefined}
+        winningAmount={winningAmount}
       />
     </div>
   );
