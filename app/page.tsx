@@ -106,13 +106,13 @@ export default function Home() {
         <button 
           className="btn-primary w-full animate-fadeIn text-sm sm:text-base flex items-center justify-center gap-2"
           onClick={() => {/* Implement Telebirr integration */}}>
-          <Image
+          {/* <Image
             src="/telebirr.png"
             alt="Telebirr"
             width={24}
             height={24}
             className="w-6 h-6 sm:w-7 sm:h-7"
-          />
+          /> */}
           Deposit with Telebirr
         </button>
       </div>
