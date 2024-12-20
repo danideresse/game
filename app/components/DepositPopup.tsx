@@ -20,9 +20,8 @@ export default function DepositPopup({ onClose }: DepositPopupProps) {
   const handleDeposit = () => {
     const numAmount = parseFloat(amount);
     if (numAmount < MIN_DEPOSIT) {
-      return; // Don't proceed if below minimum
+      return;
     }
-    // Handle deposit logic here
     onClose();
   };
 
@@ -54,10 +53,16 @@ export default function DepositPopup({ onClose }: DepositPopupProps) {
             )}
           </div>
 
-          <div className="bg-white/5 rounded-lg p-4">
-            <p className="text-sm text-white/70 mb-2">Points Conversion</p>
+          <div className="bg-white/5 rounded-lg p-4 space-y-2">
+            <div className="text-sm text-white/70 border-b border-white/10 pb-2">
+              Conversion Rate: 1 Birr = {POINT_MULTIPLIER} Points
+            </div>
+            <p className="text-sm text-white/70 mb-1">Your Points</p>
             <div className="text-xl font-bold text-primary">
-              {amount ? `${amount} × ${POINT_MULTIPLIER} = ${points} points` : '0 points'}
+              {points.toLocaleString()} Points
+            </div>
+            <div className="text-xs text-white/50 mt-1">
+              ({amount ? parseFloat(amount).toLocaleString() : '0'} Birr × {POINT_MULTIPLIER})
             </div>
           </div>
 

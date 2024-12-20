@@ -37,4 +37,4 @@ export default function Timer({ initialTime, onTimeUp, isReset }: TimerProps) {
       {timeLeft}s
     </div>
   );
-} 
+}
