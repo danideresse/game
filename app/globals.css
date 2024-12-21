@@ -76,7 +76,6 @@ body {
 
 .card {
   @apply glass-effect rounded-2xl transition-all duration-300;
-  &:hover 
 }
 
 .btn-primary {
