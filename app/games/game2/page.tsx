@@ -69,10 +69,10 @@ export default function Game2() {
             onClick={() => setSelectedNumber(num)}
             className={`
               card p-4 md:p-6 text-lg sm:text-xl md:text-2xl font-bold 
-              hover:scale-105 transition-all
+              hover:scale-110 transition-all
               ${selectedNumber === num 
-                ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-glow' 
-                : 'bg-white dark:bg-gaming-dark text-orange-500 dark:text-white hover:bg-primary/10'}
+                ? 'bg-primary dark:bg-primary dark:text-white-500 dark:'
+                : 'bg-primary white:bg-gaming-dark text-orange-500 white:text-orange-500'}
             `}>
             {num}
           </button>
