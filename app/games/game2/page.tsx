@@ -13,6 +13,8 @@ export default function Game2() {
   const [isGameOver, setIsGameOver] = useState(false);
   const [winningNumber, setWinningNumber] = useState(0);
   const [timerReset, setTimerReset] = useState(false);
+  const [showPickMessage, setShowPickMessage] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
   const generateRandomNumbers = () => {
     const nums = new Set<number>();
@@ -27,20 +29,26 @@ export default function Game2() {
   }, []);
 
   const handleBet = () => {
-    const results = ['win', 'lose', 'retry'] as const;
-    const randomResult = results[Math.floor(Math.random() * results.length)];
-    
-    if (randomResult === 'win') {
-      setWinningAmount(Math.floor(Math.random() * 200) + 100);
-    }
-    
-    setGameResult(randomResult);
+    setShowPickMessage(true);
+    setIsLocked(true);
   };
 
   const handleTimeUp = () => {
-    setIsGameOver(true);
-    setWinningNumber(Math.floor(Math.random() * 100) + 1);
+    const randomIndex = Math.floor(Math.random() * numbers.length);
+    const randomWinningNumber = numbers[randomIndex];
+    setWinningNumber(randomWinningNumber);
     setWinningAmount(Math.floor(Math.random() * 200) + 100);
+    
+    const didWin = selectedNumber === randomWinningNumber;
+    setGameResult(didWin ? 'win' : 'lose');
+  };
+
+  const handleResultClose = () => {
+    setGameResult(null);
+    setShowPickMessage(false);
+    setIsGameOver(true);
+    setSelectedNumber(null);
+    setIsLocked(false);
   };
 
   const resetGame = () => {
@@ -48,8 +56,11 @@ export default function Game2() {
     setSelectedNumber(null);
     setGameResult(null);
     setWinningAmount(0);
+    setWinningNumber(0);
     setNumbers(generateRandomNumbers());
     setTimerReset(!timerReset);
+    setShowPickMessage(false);
+    setIsLocked(false);
   };
 
   return (
@@ -62,16 +73,26 @@ export default function Game2() {
         />
       </div>
       
+      {showPickMessage && selectedNumber && !gameResult && (
+        <div className="text-center mb-4 animate-slide-in-right">
+          <p className="text-theme-secondary">
+            You picked number <span className="text-primary font-bold">{selectedNumber}</span>. Good luck!
+          </p>
+        </div>
+      )}
+      
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
         {numbers.map((num) => (
           <button
             key={num}
-            onClick={() => setSelectedNumber(num)}
+            onClick={() => !isLocked && setSelectedNumber(num)}
+            disabled={isLocked}
             className={`
               card p-4 md:p-6 text-lg sm:text-xl md:text-2xl font-bold 
-              hover:scale-110 transition-all
+              transition-all
+              ${isLocked ? 'cursor-not-allowed opacity-70' : 'hover:scale-110'}
               ${selectedNumber === num 
-                ? 'bg-primary dark:bg-primary dark:text-white-500 dark:'
+                ? 'bg-primary dark:bg-primary dark:text-white-500'
                 : 'bg-primary white:bg-gaming-dark text-orange-500 white:text-orange-500'}
             `}>
             {num}
@@ -82,18 +103,19 @@ export default function Game2() {
       <div className="mt-8 max-w-md mx-auto">
         <button 
           className="btn-primary w-full text-sm sm:text-base"
-          disabled={!selectedNumber}
+          disabled={!selectedNumber || isLocked}
           onClick={handleBet}>
-          Choose
+          {isLocked ? 'Number Locked' : 'Choose'}
         </button>
       </div>
 
-      {gameResult && (
+      {gameResult && !isGameOver && (
         <GameResult 
           result={gameResult} 
-          onClose={() => setGameResult(null)}
+          onClose={handleResultClose}
           selectedNumber={selectedNumber || undefined}
           winningAmount={winningAmount}
+          winningNumber={winningNumber}
         />
       )}
 
