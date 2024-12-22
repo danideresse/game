@@ -5,12 +5,56 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PhoneIcon, WalletIcon, ArrowPathIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import DepositPopup from '../components/DepositPopup';
+import { useGame } from '../context/GameContext';
+import WithdrawPopup from '../components/WithdrawPopup';
+import UpdatePhonePopup from '../components/UpdatePhonePopup';
+import SignOutConfirm from '../components/SignOutConfirm';
 
 export default function Profile() {
-  const [balance] = useState(1000);
-  const [phoneNumber] = useState('+251 91 234 5678');
+  const { balance, transactions, updateBalance, addTransaction } = useGame();
+  const [phoneNumber, setPhoneNumber] = useState('+251 91 234 5678');
   const [username] = useState('USER123');
   const [showDepositPopup, setShowDepositPopup] = useState(false);
+  const [showWithdrawPopup, setShowWithdrawPopup] = useState(false);
+  const [showUpdatePhone, setShowUpdatePhone] = useState(false);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+
+  const handleDepositSuccess = (points: number) => {
+    updateBalance(points);
+    addTransaction({
+      type: 'deposit',
+      amount: points,
+      date: new Date().toISOString(),
+      status: 'completed'
+    });
+  };
+
+  const handleWithdrawSuccess = (points: number, amount: number) => {
+    updateBalance(-points);
+    addTransaction({
+      type: 'withdraw',
+      amount: points,
+      date: new Date().toISOString(),
+      status: 'completed'
+    });
+  };
+
+  const handleUpdatePhone = (newPhone: string) => {
+    setPhoneNumber(newPhone);
+    // Here you would typically update the phone number in your backend
+  };
+
+  const handleSignOut = () => {
+    // Here you would handle the sign out logic
+    // For example, clear local storage, redirect to login, etc.
+    localStorage.clear();
+    window.location.href = '/login'; // or use router.push('/login')
+  };
+
+  // Filter transactions for profile page
+  const filteredTransactions = transactions.filter(
+    tx => tx.type === 'deposit' || tx.type === 'withdraw'
+  ).slice(0, 5); // Show only last 5 transactions
 
   return (
     <div className="p-4 sm:p-6 md:p-8 animate-slideUpAndFade space-y-6">
@@ -41,7 +85,7 @@ export default function Profile() {
             <ArrowPathIcon className="w-5 h-5" />
           </button>
         </div>
-        <div className="text-3xl font-bold text-primary mb-6 animate-shimmer bg-gradient-to-r from-transparent via-primary/10 to-transparent bg-[length:200%_100%]">
+        <div className="text-3xl font-bold text-primary mb-6 animate-shimmer">
           {balance.toFixed(2)} Points
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -51,7 +95,10 @@ export default function Profile() {
           >
             Deposit
           </button>
-          <button className="glass-effect text-theme-secondary hover:text-primary px-6 py-3 rounded-lg transition-all duration-300 hover:scale-110 hover:-rotate-1">
+          <button 
+            className="glass-effect text-theme-secondary hover:text-primary px-6 py-3 rounded-lg transition-all duration-300 hover:scale-110 hover:-rotate-1"
+            onClick={() => setShowWithdrawPopup(true)}
+          >
             Withdraw
           </button>
         </div>
@@ -63,27 +110,17 @@ export default function Profile() {
           Recent Transactions
         </h2>
         <div className="space-y-4">
-          {/* Add staggered animation to transactions */}
-          <div className="space-y-4 [&>*:nth-child(1)]:animate-slideRightAndFade [&>*:nth-child(2)]:animate-slideRightAndFade [&>*:nth-child(2)]:delay-100 [&>*:nth-child(3)]:animate-slideRightAndFade [&>*:nth-child(3)]:delay-200">
+          {filteredTransactions.map((transaction, index) => (
             <TransactionItem 
-              type="deposit"
-              amount={500}
-              date="2024-03-19"
-              status="completed"
+              key={transaction.date}
+              {...transaction}
             />
-            <TransactionItem 
-              type="withdraw"
-              amount={200}
-              date="2024-03-18"
-              status="pending"
-            />
-            <TransactionItem 
-              type="bet"
-              amount={100}
-              date="2024-03-17"
-              status="completed"
-            />
-          </div>
+          ))}
+          {filteredTransactions.length === 0 && (
+            <div className="text-center text-theme-secondary py-4">
+              No transactions yet
+            </div>
+          )}
         </div>
       </div>
 
@@ -93,11 +130,20 @@ export default function Profile() {
           Account Settings
         </h2>
         <div className="space-y-3">
-          <button className="w-full text-left px-4 py-3 rounded-lg glass-effect hover:text-primary transition-all duration-300 hover:scale-105 hover:translate-x-2 flex items-center gap-3">
+          <button 
+            onClick={() => setShowUpdatePhone(true)}
+            className="w-full text-left px-4 py-3 rounded-lg glass-effect hover:text-primary 
+              transition-all duration-300 hover:scale-105 hover:translate-x-2 flex items-center gap-3"
+          >
             <PhoneIcon className="w-5 h-5" />
             Update Phone Number
           </button>
-          <button className="w-full text-left px-4 py-3 rounded-lg glass-effect text-red-500 hover:text-red-400 transition-all duration-300 hover:scale-105 hover:translate-x-2 flex items-center gap-3">
+          <button 
+            onClick={() => setShowSignOutConfirm(true)}
+            className="w-full text-left px-4 py-3 rounded-lg glass-effect text-red-500 
+              hover:text-red-400 transition-all duration-300 hover:scale-105 hover:translate-x-2 
+              flex items-center gap-3"
+          >
             <ArrowRightOnRectangleIcon className="w-5 h-5" />
             Sign Out
           </button>
@@ -105,7 +151,32 @@ export default function Profile() {
       </div>
 
       {showDepositPopup && (
-        <DepositPopup onClose={() => setShowDepositPopup(false)} />
+        <DepositPopup 
+          onClose={() => setShowDepositPopup(false)}
+          onSuccess={handleDepositSuccess}
+        />
+      )}
+
+      {showWithdrawPopup && (
+        <WithdrawPopup 
+          onClose={() => setShowWithdrawPopup(false)}
+          onSuccess={handleWithdrawSuccess}
+        />
+      )}
+
+      {showUpdatePhone && (
+        <UpdatePhonePopup
+          currentPhone={phoneNumber}
+          onClose={() => setShowUpdatePhone(false)}
+          onUpdate={handleUpdatePhone}
+        />
+      )}
+
+      {showSignOutConfirm && (
+        <SignOutConfirm
+          onConfirm={handleSignOut}
+          onCancel={() => setShowSignOutConfirm(false)}
+        />
       )}
     </div>
   );
@@ -113,19 +184,27 @@ export default function Profile() {
 
 // Update TransactionItem with hover animation
 function TransactionItem({ type, amount, date, status }: {
-  type: 'deposit' | 'withdraw' | 'bet';
+  type: 'deposit' | 'withdraw' | 'win' | 'loss' | 'bet';
   amount: number;
   date: string;
   status: 'completed' | 'pending';
 }) {
   const getTypeColor = () => {
     switch(type) {
-      case 'deposit': return 'text-green-500';
-      case 'withdraw': return 'text-red-500';
-      case 'bet': return 'text-blue-500';
-      default: return 'text-gray-500';
+      case 'deposit':
+      case 'win': 
+        return 'text-green-500';
+      case 'withdraw':
+      case 'loss': 
+        return 'text-red-500';
+      case 'bet': 
+        return 'text-blue-500';
+      default: 
+        return 'text-gray-500';
     }
   };
+
+  const isPositive = type === 'deposit' || type === 'win';
 
   return (
     <div className="flex items-center justify-between p-3 glass-effect rounded-lg transform transition-all duration-300 hover:scale-105 hover:translate-x-2">
@@ -139,7 +218,7 @@ function TransactionItem({ type, amount, date, status }: {
       </div>
       <div className="flex items-center gap-2">
         <span className="font-semibold text-primary">
-          {type === 'deposit' ? '+' : '-'}{amount} Points
+          {isPositive ? '+' : '-'}{amount} Points
         </span>
         <span className={`text-sm ${status === 'completed' ? 'text-green-500' : 'text-yellow-500'}`}>
           {status}

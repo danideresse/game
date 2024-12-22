@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Squares2X2Icon as ViewGridIcon, ListBulletIcon as ViewListIcon } from '@heroicons/react/24/outline';
 import DepositPopup from './components/DepositPopup';
+import { useGame } from './context/GameContext';
 
 export default function Home() {
-  const [balance] = useState(0);
+  const { balance, updateBalance, transactions, addTransaction } = useGame();
   const [isGridView, setIsGridView] = useState(true);
   const [showDepositPopup, setShowDepositPopup] = useState(false);
   const uniqueId = "USER123";
@@ -26,6 +27,16 @@ export default function Home() {
       href: '/games/game2'
     }
   ];
+
+  const handleDepositSuccess = (points: number) => {
+    updateBalance(points);
+    addTransaction({
+      type: 'deposit',
+      amount: points,
+      date: new Date().toISOString(),
+      status: 'completed'
+    });
+  };
 
   return (
     <div className="p-4 sm:p-6 md:p-8 pb-20 space-y-8 animate-slideUpAndFade">
@@ -113,7 +124,10 @@ export default function Home() {
       </div>
 
       {showDepositPopup && (
-        <DepositPopup onClose={() => setShowDepositPopup(false)} />
+        <DepositPopup 
+          onClose={() => setShowDepositPopup(false)}
+          onSuccess={handleDepositSuccess}
+        />
       )}
     </div>
   );

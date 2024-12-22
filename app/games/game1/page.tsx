@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Timer from '../../components/Timer';
 import GameResult from '../../components/GameResult';
 import GameOver from '../../components/GameOver';
+import { useGame } from '../../context/GameContext';
 
 export default function Game1() {
+  const { updateBalance, addTransaction } = useGame();
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [numbers, setNumbers] = useState<number[]>([]);
   const [gameResult, setGameResult] = useState<'win' | 'lose' | 'retry' | null>(null);
@@ -15,6 +18,8 @@ export default function Game1() {
   const [timerReset, setTimerReset] = useState(false);
   const [showPickMessage, setShowPickMessage] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [betAmount] = useState(50);
+  const router = useRouter();
   
   const generateRandomNumbers = () => {
     const nums = new Set<number>();
@@ -28,6 +33,52 @@ export default function Game1() {
     setNumbers(generateRandomNumbers());
   }, []);
 
+  const handleGameExit = (targetPath: string) => {
+    if (isLocked && !isGameOver) {
+      if (window.confirm('You will lose 50 points if you leave. Are you sure?')) {
+        updateBalance(-betAmount);
+        router.push(targetPath);
+      }
+    } else {
+      router.push(targetPath);
+    }
+  };
+
+  const handleNavigation = (e: MouseEvent) => {
+    if (isLocked && !isGameOver) {
+      e.preventDefault();
+      const targetPath = (e.target as HTMLAnchorElement).closest('a')?.href;
+      if (targetPath) {
+        const path = new URL(targetPath).pathname;
+        handleGameExit(path);
+      }
+    }
+  };
+
+  const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    if (isLocked && !isGameOver) {
+      e.preventDefault();
+      e.returnValue = `You will lose ${betAmount} points if you leave. Are you sure?`;
+      return e.returnValue;
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    const navLinks = document.querySelectorAll('a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', handleNavigation as any);
+    });
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      navLinks.forEach(link => {
+        link.removeEventListener('click', handleNavigation as any);
+      });
+    };
+  }, [isLocked, isGameOver, router]);
+
   const handleBet = () => {
     setShowPickMessage(true);
     setIsLocked(true);
@@ -40,6 +91,25 @@ export default function Game1() {
     setWinningAmount(Math.floor(Math.random() * 150) + 50);
     
     const didWin = selectedNumber === randomWinningNumber;
+    if (didWin) {
+      updateBalance(winningAmount);
+      addTransaction({
+        type: 'win',
+        amount: winningAmount,
+        date: new Date().toISOString(),
+        status: 'completed',
+        gameId: 1
+      });
+    } else {
+      updateBalance(-betAmount);
+      addTransaction({
+        type: 'loss',
+        amount: betAmount,
+        date: new Date().toISOString(),
+        status: 'completed',
+        gameId: 1
+      });
+    }
     setGameResult(didWin ? 'win' : 'lose');
   };
 

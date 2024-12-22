@@ -1,14 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import TransactionSuccess from './TransactionSuccess';
 
 interface DepositPopupProps {
   onClose: () => void;
+  onSuccess: (points: number) => void;
 }
 
-export default function DepositPopup({ onClose }: DepositPopupProps) {
+export default function DepositPopup({ onClose, onSuccess }: DepositPopupProps) {
   const [amount, setAmount] = useState<string>('');
   const [points, setPoints] = useState<number>(0);
+  const [showSuccess, setShowSuccess] = useState(false);
   const POINT_MULTIPLIER = 25;
   const MIN_DEPOSIT = 5;
 
@@ -22,8 +25,22 @@ export default function DepositPopup({ onClose }: DepositPopupProps) {
     if (numAmount < MIN_DEPOSIT) {
       return;
     }
-    onClose();
+    setShowSuccess(true);
+    onSuccess(points);
   };
+
+  if (showSuccess) {
+    return (
+      <TransactionSuccess 
+        amount={parseFloat(amount)}
+        points={points}
+        onClose={() => {
+          setShowSuccess(false);
+          onClose();
+        }}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4 animate-fadeIn">
