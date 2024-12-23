@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useGame } from '../context/GameContext';
+import WithdrawSuccess from './WithdrawSuccess';
 
 interface WithdrawPopupProps {
   onClose: () => void;
@@ -47,6 +48,19 @@ export default function WithdrawPopup({ onClose, onSuccess }: WithdrawPopupProps
     }
   };
 
+  if (showSuccess) {
+    return (
+      <WithdrawSuccess 
+        points={parseFloat(points)}
+        amount={finalAmount}
+        onClose={() => {
+          setShowSuccess(false);
+          onClose();
+        }}
+      />
+    );
+  }
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70" onClick={onClose} />
@@ -74,8 +88,10 @@ export default function WithdrawPopup({ onClose, onSuccess }: WithdrawPopupProps
               type="number"
               value={points}
               onChange={(e) => setPoints(e.target.value)}
-              className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 text-gray-900 dark:text-white
-                border border-gray-200 dark:border-orange-500 focus:outline-none focus:border-primary"
+              className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 
+                text-gray-400 dark:text-orange-500 
+                border border-gray-200 dark:border-orange-500 
+                focus:outline-none focus:border-primary"
               placeholder="Enter points"
               min={MIN_POINTS}
               max={balance}

@@ -57,11 +57,11 @@ export default function DepositPopup({ onClose, onSuccess }: DepositPopupProps) 
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount in Birr"
-              className="w-full px-4 py-3 rounded-lg bg-white/10 text-white placeholder-white/50 
-                border-2 border-transparent focus:border-primary outline-none transition-all"
+              className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 pl-10 
+                text-gray-300 dark:text-white"
+              placeholder="Enter amount"
               min={MIN_DEPOSIT}
-              step="any"
+              required
             />
             {parseFloat(amount) > 0 && parseFloat(amount) < MIN_DEPOSIT && (
               <p className="text-red-500 text-sm mt-2">

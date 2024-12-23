@@ -6,9 +6,10 @@ import Timer from '../../components/Timer';
 import GameResult from '../../components/GameResult';
 import GameOver from '../../components/GameOver';
 import { useGame } from '../../context/GameContext';
+import DepositPrompt from '../../components/DepositPrompt';
 
 export default function Game2() {
-  const { updateBalance, addTransaction } = useGame();
+  const { balance, updateBalance, addTransaction } = useGame();
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [numbers, setNumbers] = useState<number[]>([]);
   const [gameResult, setGameResult] = useState<'win' | 'lose' | 'retry' | null>(null);
@@ -19,6 +20,7 @@ export default function Game2() {
   const [showPickMessage, setShowPickMessage] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [betAmount] = useState(100);
+  const [showDepositPrompt, setShowDepositPrompt] = useState(false);
   const router = useRouter();
 
   const generateRandomNumbers = () => {
@@ -34,6 +36,10 @@ export default function Game2() {
   }, []);
 
   const handleBet = () => {
+    if (balance < betAmount) {
+      setShowDepositPrompt(true);
+      return;
+    }
     setShowPickMessage(true);
     setIsLocked(true);
   };
@@ -199,7 +205,7 @@ export default function Game2() {
           className="btn-primary w-full text-sm sm:text-base"
           disabled={!selectedNumber || isLocked}
           onClick={handleBet}>
-          {isLocked ? 'Number Locked' : 'Choose'}
+          {isLocked ? 'Number Locked' : balance < betAmount ? 'Deposit to Play' : 'Choose'}
         </button>
       </div>
 
@@ -219,6 +225,10 @@ export default function Game2() {
           winningAmount={winningAmount}
           onClose={resetGame}
         />
+      )}
+
+      {showDepositPrompt && (
+        <DepositPrompt onClose={() => setShowDepositPrompt(false)} />
       )}
     </div>
   );

@@ -17,8 +17,11 @@ const navItems = [
 export default function Navigation({ isGameActive }: NavigationProps) {
   const pathname = usePathname()
   
-  // Hide navigation on auth pages
-  if (pathname === '/login' || pathname === '/signup') {
+  // Hide navigation on auth pages or if not logged in
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
+  const isLoggedIn = typeof window !== 'undefined' && localStorage.getItem('user') !== null;
+
+  if (isAuthPage || !isLoggedIn) {
     return null;
   }
 

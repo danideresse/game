@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { XMarkIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import PhoneInput from './PhoneInput';
 
 interface UpdatePhonePopupProps {
   currentPhone: string;
@@ -14,8 +15,7 @@ export default function UpdatePhonePopup({ currentPhone, onClose, onUpdate }: Up
   const [error, setError] = useState('');
 
   const validatePhone = (number: string) => {
-    const phoneRegex = /^\+251[0-9]{9}$/;
-    return phoneRegex.test(number);
+    return number.startsWith('+251') && number.length === 13;
   };
 
   const handleSubmit = () => {
@@ -45,24 +45,14 @@ export default function UpdatePhonePopup({ currentPhone, onClose, onUpdate }: Up
             <label className="text-sm text-theme-secondary mb-2 block">
               Phone Number
             </label>
-            <div className="relative">
-              <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-secondary" />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => {
-                  setPhone(e.target.value);
-                  setError('');
-                }}
-                className="w-full bg-white/5 rounded-lg p-3 pl-10 text-white"
-                placeholder="+251XXXXXXXXX"
-              />
-            </div>
-            {error && (
-              <p className="text-red-500 text-sm mt-2">
-                {error}
-              </p>
-            )}
+            <PhoneInput
+              value={phone}
+              onChange={(value) => {
+                setPhone(value);
+                setError('');
+              }}
+              error={error}
+            />
           </div>
 
           <button

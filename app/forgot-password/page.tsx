@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PhoneIcon, LockClosedIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import CodeSentSuccess from '../components/CodeSentSuccess';
+import PhoneInput from '../components/PhoneInput';
 
 type Step = 'phone' | 'verify' | 'reset';
 
@@ -95,17 +96,14 @@ export default function ForgotPassword() {
               <label className="text-sm text-theme-secondary block mb-2">
                 Phone Number
               </label>
-              <div className="relative">
-                <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-secondary" />
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-white/5 rounded-lg p-3 pl-10 text-white"
-                  placeholder="+251XXXXXXXXX"
-                  required
-                />
-              </div>
+              <PhoneInput
+                value={phone}
+                onChange={(value) => {
+                  setPhone(value);
+                  setError('');
+                }}
+                error={error}
+              />
             </div>
 
             <button
@@ -133,7 +131,8 @@ export default function ForgotPassword() {
                 type="text"
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                className="w-full bg-white/5 rounded-lg p-3 text-center text-2xl tracking-widest text-white"
+                className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 
+                  text-center text-2xl tracking-widest text-gray-300 dark:text-gray-400"
                 placeholder="000000"
                 required
               />
@@ -169,7 +168,7 @@ export default function ForgotPassword() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-white/5 rounded-lg p-3 pl-10 text-white"
+                  className="w-full bg-white/5 rounded-lg p-3 pl-10 text-gray-400"
                   placeholder="••••••••"
                   required
                 />
@@ -186,7 +185,7 @@ export default function ForgotPassword() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-white/5 rounded-lg p-3 pl-10 text-white"
+                  className="w-full bg-white/5 rounded-lg p-3 pl-10 text-gray-400"
                   placeholder="••••••••"
                   required
                 />

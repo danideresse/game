@@ -18,6 +18,7 @@ export default function Profile() {
   const [showWithdrawPopup, setShowWithdrawPopup] = useState(false);
   const [showUpdatePhone, setShowUpdatePhone] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleDepositSuccess = (points: number) => {
     updateBalance(points);
@@ -56,6 +57,22 @@ export default function Profile() {
     tx => tx.type === 'deposit' || tx.type === 'withdraw'
   ).slice(0, 5); // Show only last 5 transactions
 
+  // Add refresh balance function
+  const handleRefreshBalance = async () => {
+    setIsRefreshing(true);
+    // Here you would typically fetch the latest balance from your API
+    // For now, we'll simulate a refresh
+    const storedBalance = localStorage.getItem('gameBalance');
+    if (storedBalance) {
+      updateBalance(parseFloat(storedBalance) - balance);
+    }
+    
+    // Add spinning animation duration
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1000);
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-8 animate-slideUpAndFade space-y-6">
       {/* Profile Header */}
@@ -81,7 +98,12 @@ export default function Profile() {
             <WalletIcon className="w-6 h-6 text-primary" />
             <h2 className="text-xl font-semibold text-theme-secondary">Balance</h2>
           </div>
-          <button className="text-primary hover:text-orange-600 transition-colors animate-wiggle">
+          <button 
+            onClick={handleRefreshBalance}
+            disabled={isRefreshing}
+            className={`text-primary hover:text-orange-600 transition-colors
+              ${isRefreshing ? 'animate-spin' : 'animate-wiggle'}`}
+          >
             <ArrowPathIcon className="w-5 h-5" />
           </button>
         </div>
