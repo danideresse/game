@@ -23,10 +23,10 @@ export default function DepositPrompt({ onClose }: DepositPromptProps) {
           <div className="w-16 h-16 bg-orange-100 dark:bg-orange-500/20 rounded-full flex items-center justify-center mx-auto">
             <CurrencyDollarIcon className="w-8 h-8 text-orange-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-primary">
+          <h2 className="text-2xl font-bold text-gray-400 dark:text-primary">
             Insufficient Points
           </h2>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-gray-300 dark:text-gray-400">
             You need points to play this game. Deposit now to start playing!
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function DepositPrompt({ onClose }: DepositPromptProps) {
           <button
             onClick={onClose}
             className="w-full py-3 rounded-lg font-bold transition-all duration-300
-              bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300
+              bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400
               hover:bg-gray-200 dark:hover:bg-white/10"
           >
             Maybe Later

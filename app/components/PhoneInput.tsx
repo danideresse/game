@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PhoneIcon } from '@heroicons/react/24/outline';
+import { PhoneIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
 interface PhoneInputProps {
   value: string;
@@ -12,6 +12,7 @@ interface PhoneInputProps {
 
 export default function PhoneInput({ value, onChange, className = '', error }: PhoneInputProps) {
   const [localValue, setLocalValue] = useState('');
+  const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     // Initialize local value from prop
@@ -29,7 +30,7 @@ export default function PhoneInput({ value, onChange, className = '', error }: P
       newValue = newValue.slice(3);
     }
 
-    // Ensure proper format (09 or 07)
+    // Ensure proper format (09, 9, 07, or 7)
     if (newValue.length > 0) {
       if (!newValue.startsWith('0')) {
         if (newValue.startsWith('9') || newValue.startsWith('7')) {
@@ -42,20 +43,35 @@ export default function PhoneInput({ value, onChange, className = '', error }: P
     newValue = newValue.slice(0, 10);
     setLocalValue(newValue);
 
+    // Show error if number is invalid and has some input
+    setShowError(newValue.length > 0 && !isValidNumber(newValue));
+
     // Update parent with international format only if valid
     if (isValidNumber(newValue)) {
       onChange(`+251${newValue.slice(1)}`);
+      setShowError(false);
     } else {
       onChange('');
     }
   };
 
   const isValidNumber = (num: string): boolean => {
-    return num.length === 10 && (num.startsWith('09') || num.startsWith('07'));
+    if (num.length !== 10) return false;
+    return num.startsWith('09') || num.startsWith('07');
   };
 
   return (
     <div className="relative">
+      {/* Error Popup */}
+      {(showError || error) && (
+        <div className="absolute -top-12 left-0 right-0 bg-red-500 text-white p-2 rounded-lg text-sm flex items-center gap-2 animate-fadeIn">
+          <ExclamationCircleIcon className="w-5 h-5" />
+          <span>
+            {error || 'Please enter a valid phone number (e.g., 09XXXXXXXX)'}
+          </span>
+        </div>
+      )}
+
       <div className="absolute inset-y-0 left-0 flex items-center pl-3">
         <div className="flex items-center gap-1">
           <PhoneIcon className="w-5 h-5 text-theme-secondary" />
@@ -69,15 +85,12 @@ export default function PhoneInput({ value, onChange, className = '', error }: P
         className={`
           w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 pl-20
           text-gray-600 dark:text-gray-400 border
-          ${error ? 'border-red-500' : 'border-gray-200 dark:border-white/10'}
+          ${showError || error ? 'border-red-500' : 'border-gray-200 dark:border-white/10'}
           focus:outline-none focus:border-primary
           ${className}
         `}
         placeholder="09XXXXXXXX"
       />
-      {error && (
-        <p className="text-red-500 text-sm mt-1">{error}</p>
-      )}
     </div>
   );
 } 
