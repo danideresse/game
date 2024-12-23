@@ -10,11 +10,32 @@ interface Transaction {
   gameId?: number;
 }
 
+interface ReferralReward {
+  referredUser: string;
+  amount: number;
+  date: string;
+  status: 'pending' | 'completed';
+}
+
+interface User {
+  username: string;
+  phone: string;
+  isLoggedIn: boolean;
+  referralCode: string;
+  referredBy: string | null;
+  referralCount: number;
+  referralPoints: number;
+  referralRewards: ReferralReward[];
+}
+
 interface GameContextType {
   balance: number;
   updateBalance: (amount: number) => void;
   transactions: Transaction[];
   addTransaction: (transaction: Transaction) => void;
+  user: User | null;
+  updateReferralReward: (referredUser: string) => void;
+  referralRewards: ReferralReward[];
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -22,10 +43,13 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 export function GameProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [referralRewards, setReferralRewards] = useState<ReferralReward[]>([]);
 
   useEffect(() => {
     const storedBalance = localStorage.getItem('gameBalance');
     const storedTransactions = localStorage.getItem('gameTransactions');
+    const storedUser = localStorage.getItem('user');
     
     if (storedBalance) {
       setBalance(parseFloat(storedBalance));
@@ -33,6 +57,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     
     if (storedTransactions) {
       setTransactions(JSON.parse(storedTransactions));
+    }
+    
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setReferralRewards(parsedUser.referralRewards || []);
     }
   }, []);
 
@@ -48,6 +78,39 @@ export function GameProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('gameTransactions', JSON.stringify(newTransactions));
   };
 
+  const updateReferralReward = (referredUser: string) => {
+    const reward: ReferralReward = {
+      referredUser,
+      amount: 100,
+      date: new Date().toISOString(),
+      status: 'completed'
+    };
+
+    const updatedRewards = [...referralRewards, reward];
+    setReferralRewards(updatedRewards);
+
+    if (user) {
+      const updatedUser = {
+        ...user,
+        referralCount: user.referralCount + 1,
+        referralPoints: user.referralPoints + reward.amount,
+        referralRewards: updatedRewards
+      };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+
+    addTransaction({
+      type: 'win',
+      amount: reward.amount,
+      date: reward.date,
+      status: 'completed',
+      description: `Referral Bonus: ${referredUser}`
+    });
+
+    updateBalance(reward.amount);
+  };
+
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'gameBalance') {
@@ -56,6 +119,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (e.key === 'gameTransactions') {
         setTransactions(JSON.parse(e.newValue || '[]'));
       }
+      if (e.key === 'user') {
+        setUser(JSON.parse(e.newValue || '{}'));
+      }
+      if (e.key === 'referralRewards') {
+        setReferralRewards(JSON.parse(e.newValue || '[]'));
+      }
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -63,7 +132,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <GameContext.Provider value={{ balance, updateBalance, transactions, addTransaction }}>
+    <GameContext.Provider value={{ 
+      balance, 
+      updateBalance, 
+      transactions, 
+      addTransaction,
+      user,
+      updateReferralReward,
+      referralRewards 
+    }}>
       {children}
     </GameContext.Provider>
   );

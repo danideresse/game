@@ -1,12 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { PhoneIcon, LockClosedIcon, UserIcon } from '@heroicons/react/24/outline';
 import PhoneInput from '../components/PhoneInput';
+import { useGame } from '../context/GameContext';
+
+function generateReferralCode(): string {
+  // Generate a random string of 8 characters
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return code;
+}
 
 export default function Signup() {
+  const searchParams = useSearchParams();
+  const [manualReferralCode, setManualReferralCode] = useState('');
+  // Get referral code from URL or manual input
+  const referralCode = searchParams.get('ref') || manualReferralCode;
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
@@ -19,13 +34,33 @@ export default function Signup() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Temporarily skip validation and just redirect
     try {
-      localStorage.setItem('user', JSON.stringify({ 
+      // Generate a random referral code
+      const newReferralCode = generateReferralCode();
+      
+      // Create new user
+      const newUser = {
         username: username || 'User123',
         phone: phone || '+251912345678',
-        isLoggedIn: true 
-      }));
+        isLoggedIn: true,
+        referralCode: newReferralCode,
+        referredBy: referralCode || null,
+        referralCount: 0,
+        referralPoints: 0,
+        referralRewards: []
+      };
+      
+      localStorage.setItem('user', JSON.stringify(newUser));
+
+      // If user was referred, update referrer's stats
+      if (referralCode) {
+        const referrer = JSON.parse(localStorage.getItem('user') || '{}');
+        if (referrer.referralCode === referralCode) {
+          const { updateReferralReward } = useGame();
+          updateReferralReward(username);
+        }
+      }
+
       router.push('/');
     } catch (err) {
       setError('Something went wrong');
@@ -112,6 +147,40 @@ export default function Signup() {
                 />
               </div>
             </div>
+
+            {/* Optional Referral Code Input - only show if no URL referral code */}
+            {!searchParams.get('ref') && (
+              <div>
+                <label className="text-sm text-theme-secondary block mb-2 flex justify-between">
+                  <span>Referral Code</span>
+                  <span className="text-primary">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={manualReferralCode}
+                    onChange={(e) => setManualReferralCode(e.target.value.toUpperCase())}
+                    className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3
+                      text-gray-600 dark:text-gray-400 font-mono"
+                    placeholder="Enter referral code"
+                  />
+                  {manualReferralCode && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs">
+                      <span className={`${
+                        manualReferralCode.length === 8 
+                          ? 'text-green-500' 
+                          : 'text-gray-400'
+                      }`}>
+                        {manualReferralCode.length}/8
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-theme-secondary mt-1">
+                  Enter a friend's referral code to get bonus points!
+                </p>
+              </div>
+            )}
           </div>
 
           <button
@@ -125,6 +194,13 @@ export default function Signup() {
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
+
+          {/* Show referral bonus info if code is present */}
+          {referralCode && (
+            <div className="text-center text-sm">
+              <span className="text-green-500">✨ Bonus points will be added on signup!</span>
+            </div>
+          )}
 
           <div className="text-center text-sm text-theme-secondary">
             Already have an account?{' '}

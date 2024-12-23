@@ -9,6 +9,7 @@ import { useGame } from '../context/GameContext';
 import WithdrawPopup from '../components/WithdrawPopup';
 import UpdatePhonePopup from '../components/UpdatePhonePopup';
 import SignOutConfirm from '../components/SignOutConfirm';
+import ReferralSection from '../components/ReferralSection';
 
 export default function Profile() {
   const { balance, transactions, updateBalance, addTransaction } = useGame();
@@ -20,6 +21,7 @@ export default function Profile() {
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const handleDepositSuccess = (points: number) => {
     updateBalance(points);
@@ -164,7 +166,14 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Account Actions */}
+      {/* Referral Section */}
+      <ReferralSection 
+        referralCode={user.referralCode || 'CODE123'}
+        referralCount={user.referralCount || 0}
+        referralPoints={user.referralPoints || 0}
+      />
+
+      {/* Account Settings - Moved to bottom */}
       <div className="card p-6 md:p-8 transform transition-all duration-300 hover:scale-105">
         <h2 className="text-xl font-semibold text-primary mb-4 animate-slideLeftAndFade delay-300">
           Account Settings
