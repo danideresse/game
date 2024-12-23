@@ -39,6 +39,13 @@ export default function Game1() {
     if (isLocked && !isGameOver) {
       if (window.confirm('You will lose 50 points if you leave. Are you sure?')) {
         updateBalance(-betAmount);
+        addTransaction({
+          type: 'loss',
+          amount: betAmount,
+          date: new Date().toISOString(),
+          status: 'completed',
+          gameId: 1
+        });
         router.push(targetPath);
       }
     } else {

@@ -19,6 +19,7 @@ export default function Profile() {
   const [showUpdatePhone, setShowUpdatePhone] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   const handleDepositSuccess = (points: number) => {
     updateBalance(points);
@@ -55,7 +56,12 @@ export default function Profile() {
   // Filter transactions for profile page
   const filteredTransactions = transactions.filter(
     tx => tx.type === 'deposit' || tx.type === 'withdraw'
-  ).slice(0, 5); // Show only last 5 transactions
+  );
+
+  // Get either all transactions or just the first 4
+  const displayedTransactions = showAllTransactions 
+    ? filteredTransactions 
+    : filteredTransactions.slice(0, 4);
 
   // Add refresh balance function
   const handleRefreshBalance = async () => {
@@ -132,16 +138,28 @@ export default function Profile() {
           Recent Transactions
         </h2>
         <div className="space-y-4">
-          {filteredTransactions.map((transaction, index) => (
+          {displayedTransactions.map((transaction, index) => (
             <TransactionItem 
               key={transaction.date}
               {...transaction}
             />
           ))}
+          
           {filteredTransactions.length === 0 && (
             <div className="text-center text-theme-secondary py-4">
               No transactions yet
             </div>
+          )}
+
+          {/* Show "See More" button only if there are more than 4 transactions */}
+          {filteredTransactions.length > 4 && (
+            <button
+              onClick={() => setShowAllTransactions(!showAllTransactions)}
+              className="w-full mt-4 text-center text-primary hover:text-orange-500 
+                transition-colors duration-300 py-2 rounded-lg glass-effect"
+            >
+              {showAllTransactions ? 'Show Less' : `See ${filteredTransactions.length - 4} More`}
+            </button>
           )}
         </div>
       </div>
