@@ -8,6 +8,7 @@ interface Transaction {
   date: string;
   status: 'completed' | 'pending';
   gameId?: number;
+  description?: string;
 }
 
 interface ReferralReward {
