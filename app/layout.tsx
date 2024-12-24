@@ -5,6 +5,7 @@ import ThemeSwitcher from './components/ThemeSwitcher'
 import { GameProvider } from './context/GameContext'
 import ClientLayout from './components/ClientLayout'
 import { metadata } from './metadata'
+import BottomNavWrapper from './components/BottomNavWrapper'
 
 export { metadata }
 
@@ -27,6 +28,7 @@ export default function RootLayout({
                   {children}
                 </div>
                 <Navigation />
+                <BottomNavWrapper />
               </div>
             </ClientLayout>
           </GameProvider>

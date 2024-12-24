@@ -4,12 +4,12 @@ import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 
 interface WithdrawSuccessProps {
-  points: number;
+  birr: number;
   amount: number;
   onClose: () => void;
 }
 
-export default function WithdrawSuccess({ points, amount, onClose }: WithdrawSuccessProps) {
+export default function WithdrawSuccess({ birr, amount, onClose }: WithdrawSuccessProps) {
   useEffect(() => {
     const duration = 2000;
     const end = Date.now() + duration;
@@ -50,7 +50,7 @@ export default function WithdrawSuccess({ points, amount, onClose }: WithdrawSuc
         </h2>
         <div className="space-y-2 mb-6">
           <p className="text-white/90">
-            Points Withdrawn: <span className="font-bold">{points.toFixed(2)} Points</span>
+            birr Withdrawn: <span className="font-bold">{birr.toFixed(2)} birr</span>
           </p>
           <p className="text-white/90">
             Amount to Receive: <span className="font-bold">{amount.toFixed(2)} Birr</span>

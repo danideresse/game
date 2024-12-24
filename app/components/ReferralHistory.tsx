@@ -25,7 +25,7 @@ export default function ReferralHistory() {
             </p>
           </div>
           <div className="text-green-500 font-semibold">
-            +{reward.amount} Points
+            +{reward.amount} Birr
           </div>
         </div>
       ))}

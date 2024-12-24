@@ -46,7 +46,7 @@ export default function GameResult({ result, onClose, selectedNumber, winningAmo
   const resultConfig = {
     win: {
       title: 'Congratulations! 🎉',
-      message: `You won ${winningAmount?.toFixed(2)} Points!`,
+      message: `You won ${winningAmount?.toFixed(2)} birr!`,
       color: 'from-green-500 to-emerald-500',
       description: 'Amazing job! Keep playing to win more!'
     },

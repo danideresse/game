@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Squares2X2Icon as ViewGridIcon, ListBulletIcon as ViewListIcon } from '@heroicons/react/24/outline';
+import { Squares2X2Icon as ViewGridIcon, ListBulletIcon as ViewListIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
 import DepositPopup from './components/DepositPopup';
 import { useGame } from './context/GameContext';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const { balance, updateBalance, transactions, addTransaction } = useGame();
   const [isGridView, setIsGridView] = useState(true);
   const [showDepositPopup, setShowDepositPopup] = useState(false);
   const uniqueId = "USER123";
+  const router = useRouter();
   
   const games = [
     {
@@ -28,11 +30,11 @@ export default function Home() {
     }
   ];
 
-  const handleDepositSuccess = (points: number) => {
-    updateBalance(points);
+  const handleDepositSuccess = (birr: number) => {
+    updateBalance(birr);
     addTransaction({
       type: 'deposit',
-      amount: points,
+      amount: birr,
       date: new Date().toISOString(),
       status: 'completed'
     });
@@ -43,7 +45,7 @@ export default function Home() {
       <div className="text-center mb-8 card p-6 md:p-8 max-w-xl mx-auto">
         <p className="text-theme-secondary animate-fadeIn text-sm sm:text-base">ID: {uniqueId}</p>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-2 animate-float number-glow text-primary">
-          {balance.toFixed(2)} Points
+          {balance.toFixed(2)} Birr
         </h1>
       </div>
       
@@ -72,6 +74,16 @@ export default function Home() {
             <ViewListIcon className="w-5 h-5" />
           </button>
         </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto">
+        <button
+          onClick={() => router.push('/custom-game/join')}
+          className="w-full btn-primary flex items-center justify-center gap-2 py-4"
+        >
+          <PlusCircleIcon className="w-6 h-6" />
+          Join / Create Custom Game
+        </button>
       </div>
 
       <div className={`

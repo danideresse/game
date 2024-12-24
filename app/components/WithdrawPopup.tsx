@@ -1,139 +1,152 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
+import TransactionSuccess from './TransactionSuccess';
 import { useGame } from '../context/GameContext';
-import WithdrawSuccess from './WithdrawSuccess';
 
 interface WithdrawPopupProps {
   onClose: () => void;
-  onSuccess: (points: number, amount: number) => void;
+  onSuccess: (amount: number) => void;
 }
 
 export default function WithdrawPopup({ onClose, onSuccess }: WithdrawPopupProps) {
   const { balance } = useGame();
-  const [points, setPoints] = useState<string>('');
-  const [amount, setAmount] = useState<number>(0);
-  const [finalAmount, setFinalAmount] = useState<number>(0);
-  const [error, setError] = useState<string>('');
+  const [amount, setAmount] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
-  
-  const POINT_TO_BIRR = 0.04;
-  const COMMISSION_RATE = 0.05;
-  const MIN_WITHDRAW_BIRR = 100;
-  const MIN_POINTS = MIN_WITHDRAW_BIRR / POINT_TO_BIRR;
+  const [processedAmount, setProcessedAmount] = useState(0);
 
-  useEffect(() => {
-    const numPoints = parseFloat(points) || 0;
-    
-    // Validate points against balance
-    if (numPoints > balance) {
-      setError(`You only have ${balance.toFixed(2)} points available`);
-    } else if (numPoints > 0 && numPoints < MIN_POINTS) {
-      setError(`Minimum withdrawal is ${MIN_WITHDRAW_BIRR} Birr (${MIN_POINTS} Points)`);
-    } else {
-      setError('');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const withdrawAmount = parseFloat(amount);
+
+    // Validate minimum withdrawal amount
+    if (withdrawAmount < 100) {
+      setError('Minimum withdrawal amount is 100 Birr');
+      return;
     }
 
-    const calculatedAmount = numPoints * POINT_TO_BIRR;
-    setAmount(calculatedAmount);
-    setFinalAmount(calculatedAmount * (1 - COMMISSION_RATE));
-  }, [points, balance]);
+    // Check if user has sufficient balance
+    if (withdrawAmount > balance) {
+      setError(`Insufficient balance. Your current balance is ${balance} Birr`);
+      return;
+    }
 
-  const handleWithdraw = () => {
-    const numPoints = parseFloat(points);
-    if (numPoints <= balance && amount >= MIN_WITHDRAW_BIRR) {
-      onSuccess(numPoints, finalAmount);
+    setIsProcessing(true);
+
+    try {
+      // Here you would typically handle the actual withdrawal process
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setProcessedAmount(withdrawAmount);
+      onSuccess(withdrawAmount);
       setShowSuccess(true);
+    } catch (error) {
+      console.error('Withdrawal failed:', error);
+      setError('Withdrawal failed. Please try again.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   if (showSuccess) {
     return (
-      <WithdrawSuccess 
-        points={parseFloat(points)}
-        amount={finalAmount}
-        onClose={() => {
-          setShowSuccess(false);
-          onClose();
-        }}
+      <TransactionSuccess 
+        type="withdraw"
+        amount={processedAmount}
+        onClose={onClose}
       />
     );
   }
 
+  const presetAmounts = [100, 200, 500, 1000];  // Updated preset amounts to start from 100
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70" onClick={onClose} />
-      <div className="relative bg-white dark:bg-gaming-dark rounded-2xl p-6 md:p-8 max-w-md w-full animate-slideUpAndFade shadow-xl">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white dark:bg-gaming-dark rounded-2xl p-6 md:p-8 max-w-md w-full animate-slideUpAndFade">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 dark:text-theme-secondary hover:text-primary"
+          className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
         >
           <XMarkIcon className="w-6 h-6" />
         </button>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-primary mb-6">Withdraw Points</h2>
-        
-        <div className="space-y-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-primary">Withdraw</h2>
+          <p className="text-theme-secondary mt-1">Withdraw funds to your Telebirr account</p>
+          <p className="text-sm text-primary mt-2">Available Balance: {balance} Birr</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-sm text-gray-600 dark:text-theme-secondary">
-                Points to Withdraw
-              </label>
-              <span className="text-sm text-gray-600 dark:text-theme-secondary">
-                Available: {balance.toFixed(2)} Points
-              </span>
-            </div>
+            <label className="text-sm text-theme-secondary block mb-2">
+              Amount (Birr)
+            </label>
             <input
               type="number"
-              value={points}
-              onChange={(e) => setPoints(e.target.value)}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
               className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 
-                text-gray-400 dark:text-orange-500 
-                border border-gray-200 dark:border-orange-500 
-                focus:outline-none focus:border-primary"
-              placeholder="Enter points"
-              min={MIN_POINTS}
+                text-gray-600 dark:text-gray-400"
+              placeholder="Enter amount (min. 100 Birr)"
+              required
+              min="100"
               max={balance}
+              step="1"
             />
             {error && (
-              <p className="text-red-500 text-sm mt-2">
-                {error}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{error}</p>
             )}
           </div>
 
-          <div className="bg-gray-50 dark:bg-white/5 rounded-lg p-4 space-y-3">
-            <div className="text-sm text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-white/10 pb-2 font-medium">
-              Conversion Details
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400 font-medium">Amount in Birr</span>
-              <span className="text-primary">{amount.toFixed(2)} Birr</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400 font-medium">Commission (5%)</span>
-              <span className="text-red-500">-{(amount * COMMISSION_RATE).toFixed(2)} Birr</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-white/10">
-              <span className="text-gray-600 dark:text-gray-400">Final Amount</span>
-              <span className="text-green-500">{finalAmount.toFixed(2)} Birr</span>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {presetAmounts.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setAmount(preset.toString())}
+                disabled={preset > balance}
+                className={`p-2 rounded-lg transition-colors ${
+                  preset > balance 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-primary/10 hover:bg-primary/20 text-primary'
+                }`}
+              >
+                {preset}
+              </button>
+            ))}
           </div>
 
-          <button
-            onClick={handleWithdraw}
-            disabled={!points || parseFloat(points) > balance || amount < MIN_WITHDRAW_BIRR}
-            className={`
-              w-full py-3 rounded-lg font-bold transition-all duration-300
-              ${(!points || parseFloat(points) > balance || amount < MIN_WITHDRAW_BIRR)
-                ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-                : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:scale-105 text-white'}
-            `}
-          >
-            Withdraw Now
-          </button>
-        </div>
+          <div className="space-y-4">
+            <button
+              type="submit"
+              disabled={isProcessing || !amount || parseFloat(amount) > balance}
+              className={`
+                w-full py-3 rounded-lg font-bold transition-all duration-300
+                bg-gradient-to-r from-primary to-orange-500 text-white
+                ${isProcessing || !amount || parseFloat(amount) > balance 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:scale-105'}
+              `}
+            >
+              {isProcessing ? 'Processing...' : 'Withdraw'}
+            </button>
+
+            <div className="text-center">
+              <Image
+                src="/Telebirr.png"
+                alt="Telebirr"
+                width={120}
+                height={40}
+                className="mx-auto"
+              />
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

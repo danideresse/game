@@ -12,9 +12,26 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  const validatePassword = (pass: string) => {
+    if (pass.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    // Validate password
+    if (!validatePassword(password)) {
+      return;
+    }
+
     setIsLoading(true);
 
     // Temporarily skip validation and just redirect
@@ -29,6 +46,11 @@ export default function Login() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Check if form is valid
+  const isFormValid = () => {
+    return phone.length >= 10 && password.length >= 6 && !passwordError;
   };
 
   return (
@@ -67,23 +89,33 @@ export default function Login() {
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 pl-10 
-                    text-gray-600 dark:text-gray-400"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    validatePassword(e.target.value);
+                  }}
+                  className={`w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 pl-10 
+                    text-gray-600 dark:text-gray-400
+                    ${passwordError ? 'border-2 border-red-500' : ''}
+                  `}
                   placeholder="••••••••"
                   required
                 />
               </div>
+              {passwordError && (
+                <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+              )}
             </div>
           </div>
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !isFormValid()}
             className={`
               w-full py-3 rounded-lg font-bold transition-all duration-300
               bg-gradient-to-r from-primary to-orange-500
-              ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+              ${(isLoading || !isFormValid()) 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:scale-105'}
             `}
           >
             {isLoading ? 'Signing in...' : 'Sign In'}

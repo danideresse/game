@@ -32,7 +32,7 @@ export default function GameOver({ winningNumber, winningAmount, onClose }: Game
           <div className="bg-white/5 rounded-lg p-4">
             <p className="text-sm text-white/70 mb-1">Prize Amount</p>
             <div className="text-2xl font-bold text-primary">
-              {winningAmount} Points
+              {winningAmount} birr
             </div>
           </div>
         </div>

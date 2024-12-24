@@ -29,9 +29,47 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+  const validatePassword = (pass: string) => {
+    if (pass.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return false;
+    }
+    if (!/\d/.test(pass)) {
+      setPasswordError('Password must contain at least one number');
+      return false;
+    }
+    if (!/[A-Z]/.test(pass)) {
+      setPasswordError('Password must contain at least one uppercase letter');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+
+  const validateConfirmPassword = (pass: string, confirm: string) => {
+    if (pass !== confirm) {
+      setConfirmPasswordError('Passwords do not match');
+      return false;
+    }
+    setConfirmPasswordError('');
+    return true;
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    // Validate password
+    const isPasswordValid = validatePassword(password);
+    const isConfirmValid = validateConfirmPassword(password, confirmPassword);
+    
+    if (!isPasswordValid || !isConfirmValid) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -46,7 +84,7 @@ export default function Signup() {
         referralCode: newReferralCode,
         referredBy: referralCode || null,
         referralCount: 0,
-        referralPoints: 0,
+        referralbirr: 0,
         referralRewards: []
       };
       
@@ -67,6 +105,18 @@ export default function Signup() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Check if form is valid
+  const isFormValid = () => {
+    return (
+      username.length >= 3 &&
+      phone.length >= 10 &&
+      password.length >= 6 &&
+      confirmPassword === password &&
+      !passwordError &&
+      !confirmPasswordError
+    );
   };
 
   return (
@@ -123,12 +173,24 @@ export default function Signup() {
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/5 rounded-lg p-3 pl-10 text-gray-400"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    validatePassword(e.target.value);
+                  }}
+                  className={`w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 pl-10 
+                    text-gray-600 dark:text-gray-400
+                    ${passwordError ? 'border-2 border-red-500' : ''}
+                  `}
                   placeholder="••••••••"
                   required
                 />
               </div>
+              {passwordError && (
+                <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+              )}
+              <p className="text-xs text-theme-secondary mt-1">
+                Must be at least 6 characters with 1 number and 1 uppercase letter
+              </p>
             </div>
 
             <div>
@@ -140,12 +202,21 @@ export default function Signup() {
                 <input
                   type="password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-white/5 rounded-lg p-3 pl-10 text-gray-400"
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    validateConfirmPassword(password, e.target.value);
+                  }}
+                  className={`w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 pl-10 
+                    text-gray-600 dark:text-gray-400
+                    ${confirmPasswordError ? 'border-2 border-red-500' : ''}
+                  `}
                   placeholder="••••••••"
                   required
                 />
               </div>
+              {confirmPasswordError && (
+                <p className="text-red-500 text-xs mt-1">{confirmPasswordError}</p>
+              )}
             </div>
 
             {/* Optional Referral Code Input - only show if no URL referral code */}
@@ -177,7 +248,7 @@ export default function Signup() {
                   )}
                 </div>
                 <p className="text-xs text-theme-secondary mt-1">
-                  Enter a friend's referral code to get bonus points!
+                  Enter a friend's referral code to get bonus birr!
                 </p>
               </div>
             )}
@@ -185,11 +256,13 @@ export default function Signup() {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !isFormValid()}
             className={`
               w-full py-3 rounded-lg font-bold transition-all duration-300
               bg-gradient-to-r from-primary to-orange-500
-              ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+              ${(isLoading || !isFormValid()) 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:scale-105'}
             `}
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
@@ -198,7 +271,7 @@ export default function Signup() {
           {/* Show referral bonus info if code is present */}
           {referralCode && (
             <div className="text-center text-sm">
-              <span className="text-green-500">✨ Bonus points will be added on signup!</span>
+              <span className="text-green-500">✨ Bonus birr will be added on signup!</span>
             </div>
           )}
 

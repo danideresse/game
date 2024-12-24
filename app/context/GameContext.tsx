@@ -25,7 +25,7 @@ interface User {
   referralCode: string;
   referredBy: string | null;
   referralCount: number;
-  referralPoints: number;
+  referralEarnings: number;
   referralRewards: ReferralReward[];
 }
 
@@ -82,7 +82,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const updateReferralReward = (referredUser: string) => {
     const reward: ReferralReward = {
       referredUser,
-      amount: 100,
+      amount: 3,
       date: new Date().toISOString(),
       status: 'completed'
     };
@@ -94,7 +94,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const updatedUser = {
         ...user,
         referralCount: user.referralCount + 1,
-        referralPoints: user.referralPoints + reward.amount,
+        referralEarnings: user.referralEarnings + reward.amount,
         referralRewards: updatedRewards
       };
       setUser(updatedUser);

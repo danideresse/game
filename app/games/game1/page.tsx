@@ -19,9 +19,10 @@ export default function Game1() {
   const [timerReset, setTimerReset] = useState(false);
   const [showPickMessage, setShowPickMessage] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
-  const [betAmount] = useState(50);
+  const [betAmount] = useState(10);
   const [showDepositPrompt, setShowDepositPrompt] = useState(false);
   const router = useRouter();
+  const [timerStarted, setTimerStarted] = useState(false);
   
   const generateRandomNumbers = () => {
     const nums = new Set<number>();
@@ -37,7 +38,7 @@ export default function Game1() {
 
   const handleGameExit = (targetPath: string) => {
     if (isLocked && !isGameOver) {
-      if (window.confirm('You will lose 50 points if you leave. Are you sure?')) {
+      if (window.confirm('You will lose the staked birr if you leave. Are you sure?')) {
         updateBalance(-betAmount);
         addTransaction({
           type: 'loss',
@@ -67,7 +68,7 @@ export default function Game1() {
   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
     if (isLocked && !isGameOver) {
       e.preventDefault();
-      e.returnValue = `You will lose ${betAmount} points if you leave. Are you sure?`;
+      e.returnValue = `You will lose ${betAmount} birr if you leave. Are you sure?`;
       return e.returnValue;
     }
   };
@@ -95,23 +96,29 @@ export default function Game1() {
     }
     setShowPickMessage(true);
     setIsLocked(true);
+    setTimerStarted(true);
   };
 
   const handleTimeUp = () => {
     const randomIndex = Math.floor(Math.random() * numbers.length);
     const randomWinningNumber = numbers[randomIndex];
     setWinningNumber(randomWinningNumber);
-    setWinningAmount(Math.floor(Math.random() * 150) + 50);
+    
+    const baseWinAmount = Math.floor(Math.random() * 150) + 50;
+    const commission = Math.round((baseWinAmount * 0.05) * 100) / 100;
+    const finalWinAmount = Math.round((baseWinAmount - commission) * 100) / 100;
+    setWinningAmount(finalWinAmount);
     
     const didWin = selectedNumber === randomWinningNumber;
     if (didWin) {
-      updateBalance(winningAmount);
+      updateBalance(finalWinAmount);
       addTransaction({
         type: 'win',
-        amount: winningAmount,
+        amount: finalWinAmount,
         date: new Date().toISOString(),
         status: 'completed',
-        gameId: 1
+        gameId: 1,
+        description: `Win (5% commission: ${commission.toFixed(2)} Birr)`
       });
     } else {
       updateBalance(-betAmount);
@@ -144,6 +151,7 @@ export default function Game1() {
     setTimerReset(!timerReset);
     setShowPickMessage(false);
     setIsLocked(false);
+    setTimerStarted(false);
   };
 
   return (
@@ -153,6 +161,7 @@ export default function Game1() {
           initialTime={60} 
           onTimeUp={handleTimeUp}
           isReset={timerReset}
+          isStarted={timerStarted}
         />
       </div>
       
@@ -175,8 +184,8 @@ export default function Game1() {
               transition-all
               ${isLocked ? 'cursor-not-allowed opacity-70' : 'hover:scale-110'}
               ${selectedNumber === num 
-                ? 'bg-primary dark:bg-primary dark:text-white-500'
-                : 'bg-primary white:bg-gaming-dark text-orange-500 white:text-orange-500'}
+                ? 'selected-number' 
+                : 'bg-gaming-dark/30 text-theme-secondary hover:text-primary'}
             `}>
             {num}
           </button>

@@ -66,6 +66,61 @@ body {
   }
 }
 
+/* Success Checkmark Animation */
+@keyframes checkmark {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  60% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes checkmark-circle {
+  0% {
+    stroke-dashoffset: 480;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 960;
+    opacity: 1;
+  }
+}
+
+.success-checkmark {
+  @apply w-16 h-16 mx-auto;
+}
+
+.success-checkmark circle {
+  stroke-dasharray: 480;
+  stroke-width: 4;
+  stroke: rgb(var(--primary));
+  fill: none;
+  animation: checkmark-circle 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.success-checkmark path {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  stroke: rgb(var(--primary));
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  animation: checkmark 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.2s;
+}
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
 }
@@ -131,4 +186,63 @@ h1 {
 
 .bg-gaming-dark {
   background-color: rgb(var(--gaming-dark));
+}
+
+/* Add styles for selected number buttons */
+.selected-number {
+  @apply bg-gradient-to-r from-orange-500 to-orange-400 text-white !important;
+}
+
+/* Ensure gradient works with hover state */
+.selected-number:hover {
+  @apply from-orange-600 to-orange-500;
+}
+
+/* Update game button styles */
+button[class*="bg-orange-500"] {
+  color: white !important;
+}
+
+/* Add input field styles */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="tel"] {
+  @apply bg-white dark:bg-white/5
+    border border-gray-100 dark:border-white/10 
+    shadow-sm
+    text-black dark:text-gray-400 !important;
+}
+
+/* Style for focused state */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus {
+  @apply border-orange-500 ring-1 ring-orange-500/30 
+    shadow-md shadow-orange-500/10
+    outline-none !important;
+}
+
+/* Update placeholder color */
+::placeholder {
+  @apply text-gray-500 dark:text-gray-500;
+}
+
+/* Ensure phone input field matches */
+.phone-input {
+  @apply bg-white dark:bg-white/5 
+    border border-gray-300 dark:border-white/10 
+    shadow-sm
+    text-black dark:text-gray-200 !important;
+}
+
+.phone-input:focus-within {
+  @apply border-orange-500 ring-1 ring-orange-500/30 
+    shadow-md shadow-orange-500/10 !important;
+}
+
+/* Style for phone input country select */
+.phone-input select {
+  @apply text-black dark:text-gray-200 !important;
 }

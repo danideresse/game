@@ -7,10 +7,10 @@ import ReferralHistory from './ReferralHistory';
 interface ReferralSectionProps {
   referralCode: string;
   referralCount: number;
-  referralPoints: number;
+  referralEarnings: number;
 }
 
-export default function ReferralSection({ referralCode, referralCount, referralPoints }: ReferralSectionProps) {
+export default function ReferralSection({ referralCode, referralCount, referralEarnings }: ReferralSectionProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopyReferralLink = async () => {
@@ -25,7 +25,7 @@ export default function ReferralSection({ referralCode, referralCount, referralP
       try {
         await navigator.share({
           title: 'Join me on Number Game!',
-          text: `Use my referral code ${referralCode} to sign up and get bonus points!`,
+          text: `Use my referral code ${referralCode} to sign up and get bonus birr!`,
           url: `${window.location.origin}/signup?ref=${referralCode}`
         });
       } catch (err) {
@@ -51,8 +51,8 @@ export default function ReferralSection({ referralCode, referralCount, referralP
             <p className="text-2xl font-bold text-primary mt-1">{referralCount}</p>
           </div>
           <div className="bg-gaming-dark/30 rounded-lg p-4 text-center">
-            <p className="text-theme-secondary text-sm">Points Earned</p>
-            <p className="text-2xl font-bold text-primary mt-1">{referralPoints}</p>
+            <p className="text-theme-secondary text-sm">Total Earnings</p>
+            <p className="text-2xl font-bold text-primary mt-1">{referralEarnings} Birr</p>
           </div>
         </div>
 
@@ -88,7 +88,7 @@ export default function ReferralSection({ referralCode, referralCount, referralP
         {/* Referral Info */}
         <div className="bg-gaming-dark/30 rounded-lg p-4 text-sm">
           <p className="text-theme-secondary">
-            Share your referral code with friends and earn <span className="text-primary font-bold">100 points</span> for each friend who signs up and makes their first deposit!
+            Share your referral code with friends and earn <span className="text-primary font-bold">3 Birr</span> for each friend who signs up!
           </p>
         </div>
       </div>

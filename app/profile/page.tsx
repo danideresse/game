@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { PhoneIcon, WalletIcon, ArrowPathIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { PhoneIcon, WalletIcon, ArrowPathIcon, ArrowRightOnRectangleIcon, CogIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 import DepositPopup from '../components/DepositPopup';
 import { useGame } from '../context/GameContext';
 import WithdrawPopup from '../components/WithdrawPopup';
@@ -12,6 +13,7 @@ import SignOutConfirm from '../components/SignOutConfirm';
 import ReferralSection from '../components/ReferralSection';
 
 export default function Profile() {
+  const router = useRouter();
   const { balance, transactions, updateBalance, addTransaction } = useGame();
   const [phoneNumber, setPhoneNumber] = useState('+251 91 234 5678');
   const [username] = useState('USER123');
@@ -23,21 +25,21 @@ export default function Profile() {
   const [showAllTransactions, setShowAllTransactions] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  const handleDepositSuccess = (points: number) => {
-    updateBalance(points);
+  const handleDepositSuccess = (amount: number) => {
+    updateBalance(amount);
     addTransaction({
       type: 'deposit',
-      amount: points,
+      amount: amount,
       date: new Date().toISOString(),
       status: 'completed'
     });
   };
 
-  const handleWithdrawSuccess = (points: number, amount: number) => {
-    updateBalance(-points);
+  const handleWithdrawSuccess = (amount: number) => {
+    updateBalance(-amount);
     addTransaction({
       type: 'withdraw',
-      amount: points,
+      amount: amount,
       date: new Date().toISOString(),
       status: 'completed'
     });
@@ -82,7 +84,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 animate-slideUpAndFade space-y-6">
+    <div className="p-4 sm:p-6 md:p-8 pb-20 space-y-8">
       {/* Profile Header */}
       <div className="card p-6 md:p-8 text-center transform transition-all duration-300 hover:scale-105">
         <div className="relative w-24 h-24 mx-auto mb-4">
@@ -100,38 +102,58 @@ export default function Profile() {
       </div>
 
       {/* Balance Card */}
-      <div className="card p-6 md:p-8 transform transition-all duration-300 hover:scale-105">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 animate-slideRightAndFade">
-            <WalletIcon className="w-6 h-6 text-primary" />
-            <h2 className="text-xl font-semibold text-theme-secondary">Balance</h2>
-          </div>
-          <button 
+      <div className="card p-6 md:p-8 text-center transform transition-all duration-300 hover:scale-105">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-primary flex items-center gap-2">
+            <WalletIcon className="w-6 h-6" />
+            Balance
+          </h2>
+          <button
             onClick={handleRefreshBalance}
-            disabled={isRefreshing}
-            className={`text-primary hover:text-orange-600 transition-colors
-              ${isRefreshing ? 'animate-spin' : 'animate-wiggle'}`}
+            className={`text-theme-secondary hover:text-primary transition-colors
+              ${isRefreshing ? 'animate-spin' : ''}`}
           >
             <ArrowPathIcon className="w-5 h-5" />
           </button>
         </div>
-        <div className="text-3xl font-bold text-primary mb-6 animate-shimmer">
-          {balance.toFixed(2)} Points
+        <div className="text-3xl font-bold text-primary mb-4">
+          {balance.toFixed(2)} Birr
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button 
-            className="btn-primary transform transition-all duration-300 hover:scale-110 hover:rotate-1"
+        <div className="grid grid-cols-2 gap-3">
+          <button
             onClick={() => setShowDepositPopup(true)}
+            className="btn-primary"
           >
             Deposit
           </button>
-          <button 
-            className="glass-effect text-theme-secondary hover:text-primary px-6 py-3 rounded-lg transition-all duration-300 hover:scale-110 hover:-rotate-1"
+          <button
             onClick={() => setShowWithdrawPopup(true)}
+            className="bg-primary/10 text-primary hover:bg-primary/20 
+              py-2 px-4 rounded-lg transition-all duration-300"
           >
             Withdraw
           </button>
         </div>
+      </div>
+
+      {/* Add Custom Games Card */}
+      <div className="card p-6 md:p-8 transform transition-all duration-300 hover:scale-105 animate-slideUpAndFade">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2 text-primary animate-slideRightAndFade">
+            <PuzzlePieceIcon className="w-6 h-6" />
+            <h2 className="text-xl font-semibold">Custom Games</h2>
+          </div>
+          <button
+            onClick={() => router.push('/custom-game/manage')}
+            className="btn-primary py-2 px-4 transform transition-all duration-300 
+              hover:scale-110 hover:rotate-1 animate-slideLeftAndFade"
+          >
+            Manage Games
+          </button>
+        </div>
+        <p className="text-theme-secondary mt-2 animate-fadeIn">
+          Create and manage your own custom number games
+        </p>
       </div>
 
       {/* Transaction History */}
@@ -170,7 +192,7 @@ export default function Profile() {
       <ReferralSection 
         referralCode={user.referralCode || 'CODE123'}
         referralCount={user.referralCount || 0}
-        referralPoints={user.referralPoints || 0}
+        referralEarnings={user.referralEarnings || 0}
       />
 
       {/* Account Settings - Moved to bottom */}
@@ -267,7 +289,7 @@ function TransactionItem({ type, amount, date, status }: {
       </div>
       <div className="flex items-center gap-2">
         <span className="font-semibold text-primary">
-          {isPositive ? '+' : '-'}{amount} Points
+          {isPositive ? '+' : '-'}{amount} Birr
         </span>
         <span className={`text-sm ${status === 'completed' ? 'text-green-500' : 'text-yellow-500'}`}>
           {status}

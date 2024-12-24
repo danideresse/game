@@ -1,67 +1,39 @@
 'use client';
 
-import { useEffect } from 'react';
-import confetti from 'canvas-confetti';
+import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface TransactionSuccessProps {
+  type: 'deposit' | 'withdraw';
   amount: number;
-  points: number;
   onClose: () => void;
 }
 
-export default function TransactionSuccess({ amount, points, onClose }: TransactionSuccessProps) {
-  useEffect(() => {
-    // Celebration effect
-    const duration = 2000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#00FF00', '#32CD32', '#008000']
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#00FF00', '#32CD32', '#008000']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
-  }, []);
-
+export default function TransactionSuccess({ type, amount, onClose }: TransactionSuccessProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 animate-fadeIn">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-6 md:p-8 
-        text-white text-center transform transition-all duration-300 animate-slideUpAndFade 
-        max-w-md w-full shadow-2xl">
-        <div className="text-6xl mb-4">✅</div>
-        <h2 className="text-2xl md:text-3xl font-bold mb-4">
-          Transaction Successful!
-        </h2>
-        <div className="space-y-2 mb-6">
-          <p className="text-white/90">
-            Deposited: <span className="font-bold">{amount.toFixed(2)} Birr</span>
-          </p>
-          <p className="text-white/90">
-            Points Added: <span className="font-bold">{points.toFixed(2)} Points</span>
+      <div className="relative bg-white dark:bg-gaming-dark rounded-2xl p-6 md:p-8 max-w-md w-full animate-slideUpAndFade">
+        <div className="text-center space-y-4">
+          {/* Animated Checkmark */}
+          <svg className="success-checkmark" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" />
+            <path d="M30 50 L45 65 L70 35" />
+          </svg>
+
+          <h2 className="text-2xl font-bold text-primary">
+            {type === 'deposit' ? 'Deposit Successful!' : 'Withdrawal Successful!'}
+          </h2>
+          <p className="text-theme-secondary">
+            {amount.toFixed(2)} Birr has been {type === 'deposit' ? 'added to' : 'withdrawn from'} your account
           </p>
         </div>
+
         <button
           onClick={onClose}
-          className="bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-lg
-            transition-all duration-300 hover:scale-105"
+          className="w-full mt-6 py-3 rounded-lg font-bold transition-all duration-300
+            bg-gradient-to-r from-primary to-orange-500 text-white hover:scale-105"
         >
-          Continue
+          Done
         </button>
       </div>
     </div>

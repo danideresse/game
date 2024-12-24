@@ -24,10 +24,10 @@ export default function DepositPrompt({ onClose }: DepositPromptProps) {
             <CurrencyDollarIcon className="w-8 h-8 text-orange-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-400 dark:text-primary">
-            Insufficient Points
+            Insufficient birr
           </h2>
           <p className="text-gray-300 dark:text-gray-400">
-            You need points to play this game. Deposit now to start playing!
+            You need birr to play this game. Deposit now to start playing!
           </p>
         </div>
 

@@ -7,6 +7,24 @@ export default function History() {
   const { transactions } = useGame();
   const [showAllTransactions, setShowAllTransactions] = useState(false);
   
+  // Helper function to get game name from code
+  const getGameName = (gameId: string | number) => {
+    // For built-in games
+    if (gameId === 1) return 'ጨዋታ 1';
+    if (gameId === 2) return 'ጨዋታ 2';
+    
+    // For custom games, fetch from localStorage
+    const customGames = JSON.parse(localStorage.getItem('customGames') || '[]');
+    const game = customGames.find((g: any) => g.code === gameId.toString());
+    
+    if (game?.name) {
+      return `Custom Game: ${game.name}`;
+    }
+
+    // Fallback
+    return `Custom Game ${gameId}`;
+  };
+
   // Filter for game transactions only and sort by date
   const gameTransactions = transactions
     .filter(tx => tx.type === 'win' || tx.type === 'loss')
@@ -30,7 +48,14 @@ export default function History() {
             <div>
               <div className="font-semibold text-primary capitalize">
                 {transaction.type === 'win' ? 'Won' : 'Lost'}
-                {transaction.gameId && ` - Game ${transaction.gameId}`}
+                {transaction.gameId && ` - ${getGameName(transaction.gameId)}`}
+                {transaction.description && (
+                  <div className="text-sm text-theme-secondary mt-1">
+                    {transaction.type === 'win' 
+                      ? `Commission deducted: ${transaction.description.split(': ')[1]}`
+                      : transaction.description}
+                  </div>
+                )}
               </div>
               <div className="text-sm text-theme-secondary">
                 {new Date(transaction.date).toLocaleDateString()}

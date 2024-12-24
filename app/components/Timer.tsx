@@ -4,37 +4,46 @@ import { useState, useEffect } from 'react';
 
 interface TimerProps {
   initialTime: number;
-  onTimeUp?: () => void;
-  isReset?: boolean;
+  onTimeUp: () => void;
+  isReset: boolean;
+  isStarted: boolean;
 }
 
-export default function Timer({ initialTime, onTimeUp, isReset }: TimerProps) {
+export default function Timer({ initialTime, onTimeUp, isReset, isStarted }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
-  
+  const [isRunning, setIsRunning] = useState(false);
+
   useEffect(() => {
-    if (isReset) {
-      setTimeLeft(initialTime);
-    }
+    setTimeLeft(initialTime);
+    setIsRunning(false);
   }, [isReset, initialTime]);
-  
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          onTimeUp?.();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    return () => clearInterval(timer);
-  }, [onTimeUp, isReset]);
-  
+    if (isStarted) {
+      setIsRunning(true);
+    }
+  }, [isStarted]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (isRunning && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && isRunning) {
+      onTimeUp();
+      setIsRunning(false);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [timeLeft, isRunning, onTimeUp]);
+
   return (
-    <div className={`text-xl sm:text-2xl md:text-3xl font-bold ${timeLeft <= 10 ? 'animate-pulse text-red-500' : 'text-primary'}`}>
-      {timeLeft}s
+    <div className="text-4xl font-bold text-primary animate-pulse">
+      {!isStarted ? 'Choose a Number' : `${timeLeft}s`}
     </div>
   );
 }

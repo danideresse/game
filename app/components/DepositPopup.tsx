@@ -1,101 +1,123 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import Image from 'next/image';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import TransactionSuccess from './TransactionSuccess';
 
 interface DepositPopupProps {
   onClose: () => void;
-  onSuccess: (points: number) => void;
+  onSuccess: (amount: number) => void;
 }
 
 export default function DepositPopup({ onClose, onSuccess }: DepositPopupProps) {
-  const [amount, setAmount] = useState<string>('');
-  const [points, setPoints] = useState<number>(0);
+  const [amount, setAmount] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const POINT_MULTIPLIER = 25;
-  const MIN_DEPOSIT = 5;
+  const [processedAmount, setProcessedAmount] = useState(0);
 
-  useEffect(() => {
-    const numAmount = parseFloat(amount) || 0;
-    setPoints(numAmount * POINT_MULTIPLIER);
-  }, [amount]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
 
-  const handleDeposit = () => {
-    const numAmount = parseFloat(amount);
-    if (numAmount < MIN_DEPOSIT) {
-      return;
+    try {
+      const depositAmount = parseFloat(amount);
+      // Here you would typically handle the actual deposit process
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setProcessedAmount(depositAmount);
+      onSuccess(depositAmount);
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Deposit failed:', error);
+    } finally {
+      setIsProcessing(false);
     }
-    setShowSuccess(true);
-    onSuccess(points);
   };
 
   if (showSuccess) {
     return (
       <TransactionSuccess 
-        amount={parseFloat(amount)}
-        points={points}
-        onClose={() => {
-          setShowSuccess(false);
-          onClose();
-        }}
+        type="deposit"
+        amount={processedAmount}
+        onClose={onClose}
       />
     );
   }
 
+  const presetAmounts = [50, 100, 200, 500, 1000];
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 animate-fadeIn">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-gaming-dark/95 rounded-2xl p-6 md:p-8 text-white text-center
-        transform transition-all duration-300 animate-slideUpAndFade max-w-md w-full shadow-2xl">
-        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-primary">
-          Deposit with Telebirr
-        </h2>
-        
-        <div className="space-y-6">
+      <div className="relative bg-white dark:bg-gaming-dark rounded-2xl p-6 md:p-8 max-w-md w-full animate-slideUpAndFade">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+        >
+          <XMarkIcon className="w-6 h-6" />
+        </button>
+
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-primary">Deposit</h2>
+          <p className="text-theme-secondary mt-1">Add funds to your account</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
+            <label className="text-sm text-theme-secondary block mb-2">
+              Amount (Birr)
+            </label>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 pl-10 
-                text-gray-300 dark:text-white"
+              className="w-full bg-gray-100 dark:bg-white/5 rounded-lg p-3 
+                text-gray-600 dark:text-gray-400"
               placeholder="Enter amount"
-              min={MIN_DEPOSIT}
               required
+              min="10"
+              step="1"
             />
-            {parseFloat(amount) > 0 && parseFloat(amount) < MIN_DEPOSIT && (
-              <p className="text-red-500 text-sm mt-2">
-                Minimum deposit is {MIN_DEPOSIT} Birr
-              </p>
-            )}
           </div>
 
-          <div className="bg-white/5 rounded-lg p-4 space-y-2">
-            <div className="text-sm text-white/70 border-b border-white/10 pb-2">
-              Conversion Rate: 1 Birr = {POINT_MULTIPLIER} Points
-            </div>
-            <p className="text-sm text-white/70 mb-1">Your Points</p>
-            <div className="text-xl font-bold text-primary">
-              {points.toLocaleString()} Points
-            </div>
-            <div className="text-xs text-white/50 mt-1">
-              ({amount ? parseFloat(amount).toLocaleString() : '0'} Birr × {POINT_MULTIPLIER})
-            </div>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+            {presetAmounts.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setAmount(preset.toString())}
+                className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 
+                  text-primary transition-colors"
+              >
+                {preset}
+              </button>
+            ))}
           </div>
 
-          <button
-            onClick={handleDeposit}
-            disabled={!amount || parseFloat(amount) < MIN_DEPOSIT}
-            className={`
-              w-full py-3 rounded-lg font-bold transition-all duration-300
-              ${(!amount || parseFloat(amount) < MIN_DEPOSIT)
-                ? 'bg-gray-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-orange-500 to-yellow-500 hover:scale-105'}
-            `}
-          >
-            Deposit Now
-          </button>
-        </div>
+          <div className="space-y-4">
+            <button
+              type="submit"
+              disabled={isProcessing || !amount}
+              className={`
+                w-full py-3 rounded-lg font-bold transition-all duration-300
+                bg-gradient-to-r from-primary to-orange-500 text-white
+                ${isProcessing || !amount ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+              `}
+            >
+              {isProcessing ? 'Processing...' : 'Deposit'}
+            </button>
+
+            <div className="text-center">
+              <Image
+                src="/Telebirr.png"
+                alt="Telebirr"
+                width={120}
+                height={40}
+                className="mx-auto"
+              />
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );
