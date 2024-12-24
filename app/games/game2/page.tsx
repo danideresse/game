@@ -172,6 +172,13 @@ export default function Game2() {
 
   return (
     <div className="p-4 sm:p-6 md:p-8 animate-slide-up max-w-2xl mx-auto">
+      <div className="text-center mb-4">
+        <h1 className="text-2xl font-bold text-primary mb-2">ጨዋታ 2</h1>
+        <p className="text-theme-secondary">
+          Stake Amount: <span className="text-primary font-bold">{betAmount} Birr</span>
+        </p>
+      </div>
+
       <div className="text-center mb-8 card p-4 md:p-6">
         <Timer 
           initialTime={60} 

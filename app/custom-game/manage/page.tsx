@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
-import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PencilIcon, UsersIcon } from '@heroicons/react/24/outline';
 
 interface CustomGame {
   code: string;
@@ -14,18 +14,30 @@ interface CustomGame {
   createdAt: string;
   active: boolean;
   totalCommission: number;
+  joinedUsers?: number;
 }
 
 export default function ManageGames() {
   const { user } = useGame();
   const [games, setGames] = useState<CustomGame[]>([]);
+  const [showAllGames, setShowAllGames] = useState(false);
   const [editingGame, setEditingGame] = useState<CustomGame | null>(null);
-  const [showAllCommissions, setShowAllCommissions] = useState(false);
+  const [numberError, setNumberError] = useState('');
+  const [timerError, setTimerError] = useState('');
+  const [stakeError, setStakeError] = useState('');
 
   useEffect(() => {
     const storedGames = JSON.parse(localStorage.getItem('customGames') || '[]');
-    const userGames = storedGames.filter((game: CustomGame) => game.creatorId === user?.username);
-    setGames(userGames);
+    const userGames = storedGames.filter((game: CustomGame) => 
+      game.creatorId === user?.username
+    );
+    
+    const gamesWithJoinedUsers = userGames.map((game: CustomGame) => ({
+      ...game,
+      joinedUsers: JSON.parse(localStorage.getItem(`game_${game.code}_users`) || '[]').length
+    }));
+    
+    setGames(gamesWithJoinedUsers);
   }, [user]);
 
   const handleDelete = (code: string) => {
@@ -37,7 +49,50 @@ export default function ManageGames() {
     }
   };
 
+  const validateNumberCount = (value: number) => {
+    if (value < 2) {
+      setNumberError('Minimum 2 numbers required');
+      return false;
+    }
+    if (value > 20) {
+      setNumberError('Maximum 20 numbers allowed');
+      return false;
+    }
+    setNumberError('');
+    return true;
+  };
+
+  const validateTimer = (seconds: number) => {
+    if (seconds < 10) {
+      setTimerError('Minimum time is 10 seconds');
+      return false;
+    }
+    if (seconds > 300) {
+      setTimerError('Maximum time is 5 minutes (300 seconds)');
+      return false;
+    }
+    setTimerError('');
+    return true;
+  };
+
+  const validateStake = (amount: number) => {
+    if (amount < 10) {
+      setStakeError('Minimum stake is 10 Birr');
+      return false;
+    }
+    setStakeError('');
+    return true;
+  };
+
   const handleUpdate = (game: CustomGame) => {
+    const isNumberValid = validateNumberCount(game.numberCount);
+    const isTimerValid = validateTimer(game.timerLimit);
+    const isStakeValid = validateStake(game.stakeAmount);
+
+    if (!isNumberValid || !isTimerValid || !isStakeValid) {
+      return;
+    }
+
     const allGames = JSON.parse(localStorage.getItem('customGames') || '[]');
     const updatedGames = allGames.map((g: CustomGame) => 
       g.code === game.code ? { ...game } : g
@@ -45,160 +100,180 @@ export default function ManageGames() {
     localStorage.setItem('customGames', JSON.stringify(updatedGames));
     setGames(games.map(g => g.code === game.code ? game : g));
     setEditingGame(null);
+    
+    setNumberError('');
+    setTimerError('');
+    setStakeError('');
   };
 
-  return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold text-primary mb-6">Manage Your Games</h1>
-      
-      {/* Commission Summary */}
-      <div className="card p-4 mb-6">
-        <h2 className="text-lg font-semibold text-primary mb-4">Commission Earnings</h2>
-        <div className="text-2xl font-bold text-primary mb-2">
-          {games.reduce((total, game) => total + (game.totalCommission || 0), 0).toFixed(2)} Birr
-        </div>
-        <p className="text-sm text-theme-secondary">
-          Total earnings from all your custom games
-        </p>
-      </div>
+  const displayedGames = showAllGames ? games : games.slice(0, 3);
 
-      {/* Games List */}
-      <div className="space-y-4">
-        {games.length === 0 ? (
-          <p className="text-center text-theme-secondary py-8">
-            You haven't created any games yet
-          </p>
-        ) : (
-          <>
-            {(showAllCommissions ? games : games.slice(0, 3)).map(game => (
-              <div key={game.code} className="card p-4">
-                {editingGame?.code === game.code ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm text-theme-secondary block mb-2">
-                        Number of Choices
-                      </label>
-                      <input
-                        type="number"
-                        value={editingGame.numberCount}
-                        onChange={(e) => setEditingGame({
-                          ...editingGame,
-                          numberCount: parseInt(e.target.value)
-                        })}
-                        className="w-full bg-gaming-dark/30 rounded-lg p-2"
-                        min={2}
-                        max={20}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-theme-secondary block mb-2">
-                        Timer (seconds)
-                      </label>
-                      <input
-                        type="number"
-                        value={editingGame.timerLimit}
-                        onChange={(e) => setEditingGame({
-                          ...editingGame,
-                          timerLimit: parseInt(e.target.value)
-                        })}
-                        className="w-full bg-gaming-dark/30 rounded-lg p-2"
-                        min={30}
-                        max={300}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-theme-secondary block mb-2">
-                        Stake Amount (Birr)
-                      </label>
-                      <input
-                        type="number"
-                        value={editingGame.stakeAmount}
-                        onChange={(e) => setEditingGame({
-                          ...editingGame,
-                          stakeAmount: parseInt(e.target.value)
-                        })}
-                        className="w-full bg-gaming-dark/30 rounded-lg p-2"
-                        min={10}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleUpdate(editingGame)}
-                        className="flex-1 btn-primary py-2"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingGame(null)}
-                        className="flex-1 bg-gaming-dark/30 rounded-lg py-2"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-primary font-bold">Game Code: {game.code}</h3>
-                        <p className="text-sm text-theme-secondary">
-                          Created: {new Date(game.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setEditingGame(game)}
-                          className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary"
-                        >
-                          <PencilIcon className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(game.code)}
-                          className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500"
-                        >
-                          <TrashIcon className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-theme-secondary">Numbers</p>
-                        <p className="text-primary font-bold">{game.numberCount}</p>
-                      </div>
-                      <div>
-                        <p className="text-theme-secondary">Timer</p>
-                        <p className="text-primary font-bold">{game.timerLimit}s</p>
-                      </div>
-                      <div>
-                        <p className="text-theme-secondary">Stake</p>
-                        <p className="text-primary font-bold">{game.stakeAmount} Birr</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-gaming-dark/30">
-                      <div className="flex justify-between items-center">
-                        <span className="text-theme-secondary">Commission Earned:</span>
-                        <span className="text-primary font-bold">
-                          {game.totalCommission?.toFixed(2) || '0.00'} Birr
-                        </span>
-                      </div>
-                    </div>
-                  </>
+  return (
+    <div className="p-4 sm:p-6 md:p-8 animate-slideUpAndFade space-y-6">
+      <h1 className="text-2xl font-bold text-primary mb-6">Manage Games</h1>
+
+      {displayedGames.map((game) => (
+        <div key={game.code} className="card p-4 md:p-6 space-y-4">
+          {editingGame?.code === game.code ? (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-theme-secondary block mb-2">
+                  Number of Choices
+                </label>
+                <input
+                  type="number"
+                  value={editingGame.numberCount}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    validateNumberCount(value);
+                    setEditingGame({
+                      ...editingGame,
+                      numberCount: value
+                    });
+                  }}
+                  className={`w-full bg-gaming-dark/30 rounded-lg p-2
+                    ${numberError ? 'border-2 border-red-500' : 'border border-gaming-dark/50'}`}
+                  min={2}
+                  max={20}
+                />
+                {numberError && (
+                  <p className="text-red-500 text-xs mt-1">{numberError}</p>
                 )}
               </div>
-            ))}
+              <div>
+                <label className="text-sm text-theme-secondary block mb-2">
+                  Timer (seconds)
+                </label>
+                <input
+                  type="number"
+                  value={editingGame.timerLimit}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    validateTimer(value);
+                    setEditingGame({
+                      ...editingGame,
+                      timerLimit: value
+                    });
+                  }}
+                  className={`w-full bg-gaming-dark/30 rounded-lg p-2
+                    ${timerError ? 'border-2 border-red-500' : 'border border-gaming-dark/50'}`}
+                  min={10}
+                  max={300}
+                />
+                {timerError && (
+                  <p className="text-red-500 text-xs mt-1">{timerError}</p>
+                )}
+              </div>
+              <div>
+                <label className="text-sm text-theme-secondary block mb-2">
+                  Stake Amount (Birr)
+                </label>
+                <input
+                  type="number"
+                  value={editingGame.stakeAmount}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    validateStake(value);
+                    setEditingGame({
+                      ...editingGame,
+                      stakeAmount: value
+                    });
+                  }}
+                  className={`w-full bg-gaming-dark/30 rounded-lg p-2
+                    ${stakeError ? 'border-2 border-red-500' : 'border border-gaming-dark/50'}`}
+                  min={10}
+                />
+                {stakeError && (
+                  <p className="text-red-500 text-xs mt-1">{stakeError}</p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleUpdate(editingGame)}
+                  disabled={!!(numberError || timerError || stakeError)}
+                  className="flex-1 btn-primary py-2 disabled:opacity-50"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingGame(null);
+                    setNumberError('');
+                    setTimerError('');
+                    setStakeError('');
+                  }}
+                  className="flex-1 bg-gaming-dark/30 rounded-lg py-2"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-xl font-bold text-primary">{game.name}</h2>
+                  <p className="text-sm text-theme-secondary mt-1">Code: {game.code}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingGame(game)}
+                    className="text-primary hover:text-orange-500 transition-colors"
+                  >
+                    <PencilIcon className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(game.code)}
+                    className="text-red-500 hover:text-red-600 transition-colors"
+                  >
+                    <TrashIcon className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
 
-            {games.length > 3 && (
-              <button
-                onClick={() => setShowAllCommissions(!showAllCommissions)}
-                className="w-full text-center text-primary hover:text-orange-500 
-                  transition-colors duration-300 py-2 rounded-lg glass-effect"
-              >
-                {showAllCommissions ? 'Show Less' : `See ${games.length - 3} More Games`}
-              </button>
-            )}
-          </>
-        )}
-      </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-sm text-theme-secondary">Numbers</p>
+                  <p className="font-bold text-primary">{game.numberCount}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-theme-secondary">Timer</p>
+                  <p className="font-bold text-primary">{game.timerLimit}s</p>
+                </div>
+                <div>
+                  <p className="text-sm text-theme-secondary">Stake</p>
+                  <p className="font-bold text-primary">{game.stakeAmount} Birr</p>
+                </div>
+                <div>
+                  <p className="text-sm text-theme-secondary">Commission</p>
+                  <p className="font-bold text-primary">{game.totalCommission.toFixed(2)} Birr</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-theme-secondary">
+                <UsersIcon className="w-5 h-5" />
+                <span>{game.joinedUsers} users joined</span>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+
+      {games.length === 0 && (
+        <div className="text-center text-theme-secondary py-8">
+          No games created yet
+        </div>
+      )}
+
+      {games.length > 3 && (
+        <button
+          onClick={() => setShowAllGames(!showAllGames)}
+          className="w-full text-center text-primary hover:text-orange-500 
+            transition-colors duration-300 py-2 rounded-lg glass-effect"
+        >
+          {showAllGames ? 'Show Less' : `See ${games.length - 3} More Games`}
+        </button>
+      )}
     </div>
   );
 } 
