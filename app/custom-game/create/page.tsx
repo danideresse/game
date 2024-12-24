@@ -236,7 +236,7 @@ export default function CreateCustomGame() {
         {/* Create Button */}
         <button
           onClick={handleCreateGame}
-          disabled={!gameName || numberError}
+          disabled={!gameName || Boolean(numberError)}
           className="w-full btn-primary py-4 text-lg disabled:opacity-50"
         >
           Create Game
