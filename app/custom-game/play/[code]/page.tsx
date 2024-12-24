@@ -85,7 +85,7 @@ export default function PlayCustomGame({ params }: { params: { code: string } })
         amount: finalWinAmount,
         date: new Date().toISOString(),
         status: 'completed',
-        gameId: game.code,
+        gameId: parseInt(game.code),
         description: `Win (5% commission: ${creatorCommission.toFixed(2)} Birr)`
       });
     } else {
