@@ -20,13 +20,15 @@ export default function Home() {
       id: 1,
       title: 'ጨዋታ 1',
       description: 'ከ አምስቱ ቁጥሮች ውስጥ አንዱን ይምረጡ',
-      href: '/games/game1'
+      href: '/games/game1',
+      stake: 10
     },
     {
       id: 2,
       title: 'ጨዋታ 2',
       description: 'ከ አስሩ ቁጥሮች ውስጥ አንዱን ይምረጡ',
-      href: '/games/game2'
+      href: '/games/game2',
+      stake: 30
     }
   ];
 
@@ -115,6 +117,9 @@ export default function Home() {
                 </h2>
                 <p className="text-sm sm:text-base text-theme-secondary">
                   {game.description}
+                </p>
+                <p className="text-sm font-semibold text-primary">
+                  Stake: {game.stake} Birr
                 </p>
               </div>
             </div>

@@ -84,7 +84,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 pb-20 space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 pb-20 space-y-6">
       {/* Profile Header */}
       <div className="card p-6 md:p-8 text-center transform transition-all duration-300 hover:scale-105">
         <div className="relative w-24 h-24 mx-auto mb-4">
@@ -103,7 +103,7 @@ export default function Profile() {
 
       {/* Balance Card */}
       <div className="card p-6 md:p-8 text-center transform transition-all duration-300 hover:scale-105">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 animate-slideDownAndFade delay-100">
           <h2 className="text-xl font-semibold text-primary flex items-center gap-2">
             <WalletIcon className="w-6 h-6" />
             Balance
@@ -116,20 +116,19 @@ export default function Profile() {
             <ArrowPathIcon className="w-5 h-5" />
           </button>
         </div>
-        <div className="text-3xl font-bold text-primary mb-4">
+        <div className="text-3xl font-bold text-primary mb-4 animate-float number-glow">
           {balance.toFixed(2)} Birr
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 animate-slideUpAndFade delay-200">
           <button
             onClick={() => setShowDepositPopup(true)}
-            className="btn-primary"
+            className="btn-primary py-2 px-4 hover:scale-105 transition-transform duration-300"
           >
             Deposit
           </button>
           <button
             onClick={() => setShowWithdrawPopup(true)}
-            className="bg-primary/10 text-primary hover:bg-primary/20 
-              py-2 px-4 rounded-lg transition-all duration-300"
+            className="btn-primary py-2 px-4 hover:scale-105 transition-transform duration-300"
           >
             Withdraw
           </button>
